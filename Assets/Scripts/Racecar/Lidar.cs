@@ -148,14 +148,6 @@ public class Lidar : RacecarModule
         }
     }
 
-    // private void OnTriggerEnter(Collider other)
-    // {
-    //     if (!other.isTrigger && this.racecar.Hud != null)
-    //     {
-    //         // LevelManager.HandleFailure(this.racecar.Index, Lidar.collisionFailureMessage);
-    //     }
-    // }
-
     /// <summary>
     /// Take a sample at the current orientation.
     /// </summary>
