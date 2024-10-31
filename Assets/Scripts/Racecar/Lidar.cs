@@ -60,6 +60,11 @@ public class Lidar : RacecarModule
     /// The failure message to show when something hits the LIDAR.
     /// </summary>
     private const string collisionFailureMessage = "The LIDAR is expensive and fragile, please do not hit it!";
+
+    /// <summary>
+    /// The Lidar visualization area on screen.
+    /// </summary>
+    public LidarHeatMap heatMap;
     #endregion
 
     #region Public Interface
@@ -119,13 +124,14 @@ public class Lidar : RacecarModule
     {
         base.Awake();
         this.Samples = new float[Lidar.NumSamples];
+        heatMap = FindObjectOfType<LidarHeatMap>();
     }
 
     private void Update()
     {
-        if (this.racecar.Hud != null)
+        if (heatMap != null)
         {
-            this.VisualizeLidar(this.racecar.Hud.LidarVisualization);
+            this.VisualizeLidar(heatMap.heatMapTexture);
         }
     }
 
@@ -142,13 +148,13 @@ public class Lidar : RacecarModule
         }
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (!other.isTrigger && this.racecar.Hud != null)
-        {
-            // LevelManager.HandleFailure(this.racecar.Index, Lidar.collisionFailureMessage);
-        }
-    }
+    // private void OnTriggerEnter(Collider other)
+    // {
+    //     if (!other.isTrigger && this.racecar.Hud != null)
+    //     {
+    //         // LevelManager.HandleFailure(this.racecar.Index, Lidar.collisionFailureMessage);
+    //     }
+    // }
 
     /// <summary>
     /// Take a sample at the current orientation.
