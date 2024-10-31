@@ -13,6 +13,17 @@ This will helps with streamline the ML learning process.
 2. Open the repository in Unity. Select the Unity version as suggested. This ensures that the version control won't get messed up.
 
 
+# How to Train:
+Use command `mlagents-learn {NNParameter.yaml} --run-id={a unique name for this training session}`
+
+Note: If you have to quit (Ctrl-C) before it finishes training, you can run pass in `--resume` flag to the command. `mlagents-learn {NNParameter.yaml} --run-id={a unique name for this training session} --resume`
+
+When the message "Start training by pressing the Play button in the Unity Editor" is displayed on the screen, you can press the Play button in Unity to start training in the Editor.
+
+## Observe the training:
+* `tensorboard --logdir results` then go to `localhost:6006` on your browser.
+
+
 ### Code reference from the MIT simulation:
 * Lidar object and Lidar script (Lidar.cs)
 * Basic Racecar script and its associated CameraModule class and Controller class (tho we don't need the latter)

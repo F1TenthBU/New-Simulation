@@ -73,6 +73,10 @@ public class Racecar : MonoBehaviour
     /// </summary>
     public Hud Hud { get; set; }
 
+    /// <summary>
+    /// Indicates whether the racecar has collided with an object.
+    /// </summary>
+    public bool Collided { get; set; } = false;
 
     /// <summary>
     /// The center point of the car.
@@ -137,51 +141,6 @@ public class Racecar : MonoBehaviour
         }
     }
 
-    // /// <summary>
-    // /// Sets the render texture and audio listener of the player perspective (3rd person) cameras.
-    // /// </summary>
-    // /// <param name="texture">The render texture to which to assign the cameras.</param>
-    // /// <param name="enableAudio">True if the audio listeners of the cameras should be enabled.</param>
-    // public void SetPlayerCameraFeatures(RenderTexture texture, bool enableAudio)
-    // {
-    //     foreach (Camera camera in this.playerCameras)
-    //     {
-    //         camera.targetTexture = texture;
-    //         camera.GetComponent<AudioListener>().enabled = enableAudio;
-    //     }
-    // }
-
-    // /// <summary>
-    // /// Sets the index of the car.
-    // /// Don't need it right now since we only have one car (no multi-player).
-    // /// </summary>
-    // /// <param name="index">The index of the car in the race.</param>
-    // public void SetIndex(int index)
-    // {
-    //     this.Index = index;
-
-    //     // Set car color and customization based on saved data
-    //     CarCustomization customization = SavedDataManager.Data.CarCustomizations[index];
-
-    //     Material frontMaterial = this.chassisFront.GetComponent<Renderer>().material;
-    //     frontMaterial.color = customization.FrontColor.Color;
-    //     frontMaterial.SetFloat("_Metallic", customization.IsFrontShiny ? 1 : 0);
-
-    //     Material backMaterial = this.chassisBack.GetComponent<Renderer>().material;
-    //     backMaterial.color = customization.BackColor.Color;
-    //     backMaterial.SetFloat("_Metallic", customization.IsBackShiny ? 1 : 0);
-    // }
-
-    // /// <summary>
-    // /// Sets the player camera which shows the user's view of the car.
-    // /// </summary>
-    // /// <param name="cameraIndex">The index of the player camera to use.</param>
-    // public void SetCamera(int cameraIndex)
-    // {
-    //     this.playerCameras[this.curCamera].enabled = false;
-    //     this.curCamera = cameraIndex;
-    //     this.playerCameras[this.curCamera].enabled = true;
-    // }
     #endregion
 
     /// <summary>
@@ -212,6 +171,20 @@ public class Racecar : MonoBehaviour
         DefaultDriveStart();
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        // Check if the collided object is a wall
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            // Debug.Log("Collision with wall");
+            // Set the speed and angle to 0
+            this.Drive.Angle = 0;
+            this.Drive.Speed = 0;
+
+            Collided = true;
+        }
+    }
+
     private void Update()
     {
         // Toggle camera when the space bar is pressed
@@ -223,6 +196,9 @@ public class Racecar : MonoBehaviour
         }
 
         DefaultDriveUpdate();
+
+        // Test out Lidar isForward
+        // Debug.Log(this.Lidar.IsForwardClear());
     }
 
     private void LateUpdate()

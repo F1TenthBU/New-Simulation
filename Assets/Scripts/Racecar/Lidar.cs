@@ -13,6 +13,9 @@ public class Lidar : RacecarModule
     /// </summary>
     public const int NumSamples = 720;
 
+    private const int forwardSampleRange = 10; // Number of samples to check in the forward direction
+    private const float clearDistanceThreshold = 50.0f; // Distance threshold to consider as clear (in dm)
+
     /// <summary>
     /// The frequency of the LIDAR motor in hz.
     /// </summary>
@@ -163,5 +166,25 @@ public class Lidar : RacecarModule
         }
 
         return Lidar.maxCode;
+    }
+
+    /// <summary>
+    /// Returns true if the forward direction is clear.
+    /// </summary>
+    /// <returns>True if the forward direction is clear, false otherwise.</returns>
+    public bool IsForwardClear()
+    {
+        int forwardIndex = 0;
+
+        for (int i = forwardSampleRange; i <= forwardSampleRange; i++)
+        {
+            int index = (forwardIndex + i + NumSamples) % NumSamples;
+            if (this.Samples[index] < clearDistanceThreshold)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

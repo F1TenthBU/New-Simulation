@@ -372,15 +372,15 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5270993318376764196, guid: b2e7be2f603a74218b414bc8f3959e1d, type: 3}
-      propertyPath: playerCameras.Array.data[0]
+      propertyPath: 'playerCameras.Array.data[0]'
       value: 
       objectReference: {fileID: 402660295}
     - target: {fileID: 5270993318376764196, guid: b2e7be2f603a74218b414bc8f3959e1d, type: 3}
-      propertyPath: playerCameras.Array.data[1]
+      propertyPath: 'playerCameras.Array.data[1]'
       value: 
       objectReference: {fileID: 2256872980646641396}
     - target: {fileID: 5270993318376764196, guid: b2e7be2f603a74218b414bc8f3959e1d, type: 3}
-      propertyPath: playerCameras.Array.data[2]
+      propertyPath: 'playerCameras.Array.data[2]'
       value: 
       objectReference: {fileID: 4684099452013095389}
     - target: {fileID: 5270993318376764196, guid: 9106752eb1b84c44bb771ada0089f44b, type: 3}
@@ -396,27 +396,27 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5270993318376764196, guid: 9106752eb1b84c44bb771ada0089f44b, type: 3}
-      propertyPath: PlayerCameras.Array.data[0]
+      propertyPath: 'PlayerCameras.Array.data[0]'
       value: 
       objectReference: {fileID: 402660295}
     - target: {fileID: 5270993318376764196, guid: 9106752eb1b84c44bb771ada0089f44b, type: 3}
-      propertyPath: PlayerCameras.Array.data[1]
+      propertyPath: 'PlayerCameras.Array.data[1]'
       value: 
       objectReference: {fileID: 2256872980646641396}
     - target: {fileID: 5270993318376764196, guid: 9106752eb1b84c44bb771ada0089f44b, type: 3}
-      propertyPath: PlayerCameras.Array.data[2]
+      propertyPath: 'PlayerCameras.Array.data[2]'
       value: 
       objectReference: {fileID: 4684099452013095389}
     - target: {fileID: 5270993318376764196, guid: 9106752eb1b84c44bb771ada0089f44b, type: 3}
-      propertyPath: playerCameras.Array.data[0]
+      propertyPath: 'playerCameras.Array.data[0]'
       value: 
       objectReference: {fileID: 402660295}
     - target: {fileID: 5270993318376764196, guid: 9106752eb1b84c44bb771ada0089f44b, type: 3}
-      propertyPath: playerCameras.Array.data[1]
+      propertyPath: 'playerCameras.Array.data[1]'
       value: 
       objectReference: {fileID: 2256872980646641396}
     - target: {fileID: 5270993318376764196, guid: 9106752eb1b84c44bb771ada0089f44b, type: 3}
-      propertyPath: playerCameras.Array.data[2]
+      propertyPath: 'playerCameras.Array.data[2]'
       value: 
       objectReference: {fileID: 4684099452013095389}
     m_RemovedComponents: []

@@ -70,3 +70,9 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# ignore the mlagent training log
+/[Aa]ssets/results/
+/[Aa]ssets/ML-Agents
+
+.DS_Store
