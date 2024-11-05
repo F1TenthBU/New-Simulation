@@ -411,17 +411,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 473399120}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &582388550 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8484895050265334610, guid: 98edbda2445b84981b7f4eef137668c9, type: 3}
-  m_PrefabInstance: {fileID: 1933523314}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cfb9e5d84232c1847ba48614dbd8f713, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &587980614
 GameObject:
   m_ObjectHideFlags: 0
@@ -908,74 +897,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1093014186}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &1205006734 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1987577223, guid: 98edbda2445b84981b7f4eef137668c9, type: 3}
-  m_PrefabInstance: {fileID: 1933523314}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1205006736
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1205006734}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6a30d140cba1f4ae79046ad407b632f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  agentParameters:
-    maxStep: 0
-  hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
-  racecar: {fileID: 582388550}
---- !u!114 &1205006737
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1205006734}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d1c4e0b1822b495aa52bc52839ecb30, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_BrainParameters:
-    VectorObservationSize: 726
-    NumStackedVectorObservations: 1
-    m_ActionSpec:
-      m_NumContinuousActions: 2
-      BranchSizes: 
-    VectorActionSize: 02000000
-    VectorActionDescriptions: []
-    VectorActionSpaceType: 1
-    hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 0}
-  m_InferenceDevice: 0
-  m_BehaviorType: 0
-  m_BehaviorName: Racecar
-  TeamId: 0
-  m_UseChildSensors: 1
-  m_UseChildActuators: 1
-  m_DeterministicInference: 0
-  m_ObservableAttributeHandling: 0
---- !u!114 &1205006739
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1205006734}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a5c9d521e5ef4759a8246a07d52221e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DecisionPeriod: 5
-  DecisionStep: 0
-  TakeActionsBetweenDecisions: 1
 --- !u!1 &1552553375
 GameObject:
   m_ObjectHideFlags: 0
@@ -1357,16 +1278,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1987577223, guid: 98edbda2445b84981b7f4eef137668c9, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1205006737}
-    - targetCorrespondingSourceObject: {fileID: 1987577223, guid: 98edbda2445b84981b7f4eef137668c9, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1205006736}
-    - targetCorrespondingSourceObject: {fileID: 1987577223, guid: 98edbda2445b84981b7f4eef137668c9, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1205006739}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 98edbda2445b84981b7f4eef137668c9, type: 3}
 --- !u!1 &2131292205
 GameObject:
