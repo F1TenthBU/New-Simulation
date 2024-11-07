@@ -98,49 +98,6 @@ public class Racecar : MonoBehaviour
         this.Drive.Stop();
     }
 
-    /// <summary>
-    /// Called each frame that the car is in default drive mode.
-    /// </summary>
-    public void DefaultDriveUpdate()
-    {
-        float speed = 0;
-        float angle = 0;
-
-        // Check for forward and backward movement
-        if (Input.GetKey(KeyCode.W))
-        {
-            speed += 1;
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            speed -= 1;
-        }
-
-        // Check for left and right movement
-        if (Input.GetKey(KeyCode.A))
-        {
-            angle -= 1;
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            angle += 1;
-        }
-
-        // Apply the speed and angle to the car's drive system
-        this.Drive.Speed = speed;
-        this.Drive.Angle = angle;
-
-        // Use the bumpers to adjust max speed
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            this.Drive.MaxSpeed = Mathf.Min(this.Drive.MaxSpeed + 0.1f, 1);
-        }
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            this.Drive.MaxSpeed = Mathf.Max(this.Drive.MaxSpeed - 0.1f, 0);
-        }
-    }
-
     #endregion
 
     /// <summary>
@@ -195,8 +152,10 @@ public class Racecar : MonoBehaviour
             this.playerCameras[this.curCamera].enabled = true;
         }
 
-        DefaultDriveUpdate();
+        // DefaultDriveUpdate();
 
+        // Test out Lidar data:
+        // Debug.Log(this.Lidar.Samples);
         // Test out Lidar isForward
         // Debug.Log(this.Lidar.IsForwardClear());
     }
@@ -215,4 +174,6 @@ public class Racecar : MonoBehaviour
             this.playerCameras[i].transform.LookAt(this.transform.position);
         }
     }
+
+    
 }
