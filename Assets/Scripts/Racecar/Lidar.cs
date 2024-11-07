@@ -127,7 +127,7 @@ public class Lidar : RacecarModule
     {
         base.Awake();
         this.Samples = new float[Lidar.NumSamples];
-        heatMap = FindObjectOfType<LidarHeatMap>();
+        heatMap = FindFirstObjectByType<LidarHeatMap>();
     }
 
     private void Update()

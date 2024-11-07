@@ -195,7 +195,7 @@ public class Racecar : MonoBehaviour
             this.playerCameras[this.curCamera].enabled = true;
         }
 
-        DefaultDriveUpdate();
+        // DefaultDriveUpdate();
 
         // Test out Lidar isForward
         // Debug.Log(this.Lidar.IsForwardClear());

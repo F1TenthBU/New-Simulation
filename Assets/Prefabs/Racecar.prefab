@@ -297,6 +297,7 @@ GameObject:
   - component: {fileID: 7006349214016194067}
   - component: {fileID: 4076662366558571558}
   - component: {fileID: 3406631267735535383}
+  - component: {fileID: 4524215437840351729}
   m_Layer: 9
   m_Name: Racecar
   m_TagString: Player
@@ -479,6 +480,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.38, y: 0.17000002, z: 0.58}
   m_Center: {x: 0, y: 0.1, z: -0.014}
+--- !u!114 &4524215437840351729
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1280362485296162747}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54c0f64a4a5854c17ad6907cf41dd368, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  racecar: {fileID: 5270993318376764196}
 --- !u!1 &1304687792548701723
 GameObject:
   m_ObjectHideFlags: 0
