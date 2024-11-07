@@ -9,8 +9,8 @@ engine_configuration_channel = EngineConfigurationChannel()
 # Load the Unity environment with the side channel
 env = UnityEnvironment(file_name="/Users/ruihang/Dev/BU F1Tenth/Simulation/Mac.app", side_channels=[engine_configuration_channel])
 
-# Set the engine configuration parameters
-engine_configuration_channel.set_configuration_parameters(time_scale=20.0)
+# Set the engine configuration parameters (1 means real time.)
+engine_configuration_channel.set_configuration_parameters(time_scale=1)
 
 # Interact with the environment
 env.reset()
@@ -28,7 +28,7 @@ while True:
         # print(f"observation len = {len(decision_steps[agent_id].obs[0])}.")
 
         # Custom action for speed and angle
-        action = [0.5, 0.1]  # angle, speed
+        action = [0.5, 1]  # angle, speed
         action_tuple = ActionTuple(continuous=np.array([action], dtype=np.float32))
         env.set_action_for_agent(behavior_name, agent_id, action_tuple)
         
