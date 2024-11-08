@@ -78,3 +78,6 @@ crashlytics-build.properties
 .DS_Store
 
 __pycache__/
+
+# ignore the unity version control file
+.plastic/
