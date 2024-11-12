@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// Simulates the IMU.
@@ -51,7 +52,7 @@ public class PhysicsModule : RacecarModule
         {
             if (!this.linearVelocity.HasValue)
             {
-                this.linearVelocity = this.transform.InverseTransformDirection(this.rBody.velocity) / 10;
+                this.linearVelocity = this.transform.InverseTransformDirection(this.rBody.velocity);
             }
             return this.linearVelocity.Value;
         }
@@ -82,6 +83,18 @@ public class PhysicsModule : RacecarModule
             return this.angularVelocity.Value;
         }
     }
+    #endregion
+
+    #region UI
+    /// <summary>
+    /// The text displaying the car's velocity.
+    /// </summary>
+    public Text velocityText;
+
+    /// <summary>
+    /// The text displaying the car's angular velocity.
+    /// </summary>
+    public Text angularVelocityText;
     #endregion
 
     /// <summary>
@@ -121,6 +134,14 @@ public class PhysicsModule : RacecarModule
         if (this.racecar.Hud != null)
         {
             this.racecar.Hud.UpdatePhysics(this.LinearVelocity.magnitude, this.LinearAccceleration, this.LinearVelocity);
+        }
+        if (this.velocityText != null)
+        {
+            this.velocityText.text = this.LinearVelocity.ToString("F2") + " m/s";
+        }
+        if (this.angularVelocityText != null)
+        {
+            this.angularVelocityText.text = this.AngularVelocity.ToString("F2") + " rad/s";
         }
     }
 

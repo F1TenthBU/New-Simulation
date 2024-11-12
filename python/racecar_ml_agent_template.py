@@ -1,6 +1,6 @@
 # Example usage of RacecarMLAgent class:
 import time
-from racecar_ml_agent import RacecarMLAgent
+from python.racecar_ml_agent import RacecarMLAgent
 import os
 
 current_directory = os.path.dirname(os.path.abspath(__file__))

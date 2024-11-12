@@ -12,6 +12,8 @@ class RacecarMLAgent:
         self.engine_configuration_channel.set_configuration_parameters(time_scale=time_scale)
         self.env.reset()
         self.behavior_name = list(self.env.behavior_specs.keys())[0]
+        self.linear_acceleration = []
+        self.angular_velocity = []
         self.lidar_data = []
         self.speed = 0.0
         self.angle = 0.0
@@ -21,6 +23,9 @@ class RacecarMLAgent:
     def _run(self):
         while self.running:
             decision_steps, terminal_steps = self.env.get_steps(self.behavior_name)
+            
+            self.linear_acceleration = decision_steps[agent_id].obs[0][:3]
+            self.angular_velocity = decision_steps[agent_id].obs[0][3:6]
 
             # extract the data from the environment and set the action
             for agent_id in decision_steps:
@@ -53,6 +58,12 @@ class RacecarMLAgent:
 
     def get_lidar_data(self):
         return self.lidar_data
+    
+    def get_linear_acceleration(self):
+        return self.linear_acceleration
+    
+    def get_angular_velocity(self):
+        return self.angular_velocity
 
     def set_speed_and_angle(self, speed, angle):
         self.speed = speed

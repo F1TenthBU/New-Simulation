@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
+using NWH.WheelController3D;
+using Unity.MLAgents;
+using Unity.MLAgents.Policies;
+using UnityEngine;
 
 /// <summary>
 /// Encapsulates a RACECAR-MN.
@@ -6,6 +10,11 @@
 public class Racecar : MonoBehaviour
 {
     #region Set in Unity Editor
+    /// <summary>
+    /// The maximum speed of the car in m/s.
+    /// </summary>
+    public float maxSpeed = 5;
+
     /// <summary>
     /// The cameras through which the user can observe the car.
     /// </summary>
@@ -78,6 +87,8 @@ public class Racecar : MonoBehaviour
     /// </summary>
     public bool Collided { get; set; } = false;
 
+    private RacecarNWH carController;
+
     /// <summary>
     /// The center point of the car.
     /// </summary>
@@ -114,6 +125,7 @@ public class Racecar : MonoBehaviour
         this.Drive = this.GetComponent<Drive>();
         this.Lidar = this.GetComponentInChildren<Lidar>();
         this.Physics = this.GetComponent<PhysicsModule>();
+        this.carController = this.GetComponent<RacecarNWH>();
 
         // Begin with main player camera (0th camera)
         if (this.playerCameras.Length > 0)
@@ -152,12 +164,20 @@ public class Racecar : MonoBehaviour
             this.playerCameras[this.curCamera].enabled = true;
         }
 
-        // DefaultDriveUpdate();
+        this.Drive.AngleK = Input.GetAxis("Horizontal");
+        this.Drive.SpeedK = Input.GetAxis("Vertical");
 
         // Test out Lidar data:
         // Debug.Log(this.Lidar.Samples);
         // Test out Lidar isForward
         // Debug.Log(this.Lidar.IsForwardClear());
+    }
+    private void FixedUpdate()
+    {
+        if (Physics.LinearVelocity.z >= maxSpeed)
+        {
+            carController.driveAxis = Math.Clamp(carController.driveAxis, -1, 0);
+        }
     }
 
     private void LateUpdate()
@@ -175,5 +195,5 @@ public class Racecar : MonoBehaviour
         }
     }
 
-    
+
 }
