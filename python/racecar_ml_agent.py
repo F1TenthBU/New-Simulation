@@ -23,12 +23,11 @@ class RacecarMLAgent:
     def _run(self):
         while self.running:
             decision_steps, terminal_steps = self.env.get_steps(self.behavior_name)
-            
-            self.linear_acceleration = decision_steps[agent_id].obs[0][:3]
-            self.angular_velocity = decision_steps[agent_id].obs[0][3:6]
 
             # extract the data from the environment and set the action
             for agent_id in decision_steps:
+                self.linear_acceleration = decision_steps[agent_id].obs[0][:3]
+                self.angular_velocity = decision_steps[agent_id].obs[0][3:6]
                 # Read data from observations
                 self.lidar_data = decision_steps[agent_id].obs[0][6:]
                 # print(f"observation len = {len(decision_steps[agent_id].obs[0])}.")
