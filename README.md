@@ -13,9 +13,11 @@ This will helps with streamline the ML learning process.
     
     You should be able to run `mlagents-learn --help` in the conda envrionment.
 3. Open the repository in Unity. Select the Unity version as suggested. This ensures that the version control won't get messed up.
+4. After you opened it, go to "File"-->"Build and Run" to build the app. Alternatively, you can press "Command + B" for this step. You can use the keyboard to drive the car around the sample track. After that, you can close this app.
+5. Now, cd to python directory `cd python`. And now, run racecar_ml_agent_template.py file to make sure your python can communicate with the Unity: `python racecar_ml_agent_template.py`. This should open up the app again, and if the app doesn't crash, you are good to go for your own algorithm.
 
 
-# How to Train:
+# How to Train with native ML Agent in Unity:
 Use command `mlagents-learn {NNParameter.yaml} --run-id={a unique name for this training session}`
 
 Note: If you have to quit (Ctrl-C) before it finishes training, you can run pass in `--resume` flag to the command. `mlagents-learn {NNParameter.yaml} --run-id={a unique name for this training session} --resume`

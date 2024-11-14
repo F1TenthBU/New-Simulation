@@ -6,9 +6,9 @@ import threading
 import time
 
 class RacecarMLAgent:
-    def __init__(self, env_path, worker_id=0, time_scale=1.0):
+    def __init__(self, env_path, time_scale=1.0):
         self.engine_configuration_channel = EngineConfigurationChannel()
-        self.env = UnityEnvironment(file_name=env_path, worker_id=worker_id ,side_channels=[self.engine_configuration_channel])
+        self.env = UnityEnvironment(file_name=env_path, side_channels=[self.engine_configuration_channel])
         self.engine_configuration_channel.set_configuration_parameters(time_scale=time_scale)
         self.env.reset()
         self.behavior_name = list(self.env.behavior_specs.keys())[0]

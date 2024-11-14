@@ -26,6 +26,15 @@ public class Drive : RacecarModule
     /// The current angle of the car's front wheels, ranging from -1 (full left) to 1 (full right).
     /// </summary>
     public float Angle { get; set; } = 0;
+    /// <summary>
+    /// The input torque applied to the rear wheels, ranging from -1 (full reverse) to 1 (full forward).
+    /// </summary>
+    public float SpeedK { get; set; } = 0;
+
+    /// <summary>
+    /// The current angle of the car's front wheels, ranging from -1 (full left) to 1 (full right).
+    /// </summary>
+    public float AngleK { get; set; } = 0;
 
     /// <summary>
     /// The max speed set by the user, ranging from 0 to 1.
@@ -39,6 +48,8 @@ public class Drive : RacecarModule
     {
         this.Speed = 0;
         this.Angle = 0;
+        this.SpeedK = 0;
+        this.AngleK = 0;
     }
     #endregion
 
@@ -52,7 +63,7 @@ public class Drive : RacecarModule
     private void FixedUpdate()
     {
         // For NWH WheelController
-        this.carController.driveAxis = this.Speed * this.MaxSpeed;
-        this.carController.steerAxis = this.Angle;
+        this.carController.driveAxis = Math.Clamp(this.Speed + this.SpeedK, -1, 1) * this.MaxSpeed;
+        this.carController.steerAxis = Math.Clamp(this.Angle + this.AngleK, -1, 1);
     }
 }

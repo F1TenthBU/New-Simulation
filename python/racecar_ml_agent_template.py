@@ -3,10 +3,10 @@ import time
 from racecar_ml_agent import RacecarMLAgent
 import os
 
-current_directory = os.path.dirname(os.path.abspath(__file__))
-print("Current directory path:", current_directory)
+parent_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+print("Parent directory path:", parent_directory)
 
-env_path = current_directory + "/Mac.app"
+env_path = parent_directory + "/Mac.app"
 racecar = RacecarMLAgent(env_path, time_scale=1.0)
 
 speed = 0
@@ -15,7 +15,7 @@ angle = 0
 def update():
     global speed, angle
     # Access Lidar data
-    lidar_data = racecar.get_lidar_data()
+    lidar_data = racecar.lidar.get_samples()
     # print(f"Lidar data: {lidar_data}")
 
     # Custom logic to control the car based on Lidar data (change your speed and angle logic here)
