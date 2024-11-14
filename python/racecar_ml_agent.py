@@ -12,9 +12,12 @@ class RacecarMLAgent:
         self.engine_configuration_channel.set_configuration_parameters(time_scale=time_scale)
         self.env.reset()
         self.behavior_name = list(self.env.behavior_specs.keys())[0]
-        self.linear_acceleration = []
-        self.angular_velocity = []
-        self.lidar_data = []
+        
+        # observations
+        self.physics = Physics()
+        self.lidar = Lidar()
+        
+        # actions
         self.speed = 0.0
         self.angle = 0.0
         self.running = False
@@ -26,10 +29,11 @@ class RacecarMLAgent:
 
             # extract the data from the environment and set the action
             for agent_id in decision_steps:
-                self.linear_acceleration = decision_steps[agent_id].obs[0][:3]
-                self.angular_velocity = decision_steps[agent_id].obs[0][3:6]
-                # Read data from observations
-                self.lidar_data = decision_steps[agent_id].obs[0][6:]
+                # Read data from observations and updating them
+                linear_acceleration = decision_steps[agent_id].obs[0][:3]
+                angular_velocity = decision_steps[agent_id].obs[0][3:6]
+                self.physics.update(linear_acceleration, angular_velocity)
+                self.lidar.update(decision_steps[agent_id].obs[0][6:])
                 # print(f"observation len = {len(decision_steps[agent_id].obs[0])}.")
 
                 # Custom action for speed and angle
@@ -55,15 +59,32 @@ class RacecarMLAgent:
         self.stop()
         self.env.close()
 
-    def get_lidar_data(self):
-        return self.lidar_data
+    def set_speed_and_angle(self, speed, angle):
+        self.speed = speed
+        self.angle = angle
+        
+# wrapper class for Lidar data
+class Lidar:
+    def __init__(self) -> None:
+        self.data = []
+        
+    def update(self, data):
+        self.data = data
     
+    def get_samples(self):
+        return self.data
+    
+class Physics:
+    def __init__(self) -> None:
+        self.linear_acceleration = []
+        self.angular_velocity = []
+        
+    def update(self, linear_acceleration, angular_velocity):
+        self.linear_acceleration = linear_acceleration
+        self.angular_velocity = angular_velocity
+        
     def get_linear_acceleration(self):
         return self.linear_acceleration
     
     def get_angular_velocity(self):
         return self.angular_velocity
-
-    def set_speed_and_angle(self, speed, angle):
-        self.speed = speed
-        self.angle = angle
