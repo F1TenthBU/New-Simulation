@@ -17,14 +17,21 @@
         unityVersion = "2023.2.20";
         changeset = "f1";
         
+        # Get architecture
+        arch = if system == "x86_64-linux" then "x86_64"
+          else if system == "aarch64-linux" then "arm64"
+          else if system == "x86_64-darwin" then "x64"
+          else if system == "aarch64-darwin" then "arm64"
+          else throw "Unsupported system: ${system}";
+        
         # Platform-specific module
         unityModule = if pkgs.stdenv.isDarwin 
-          then "--module mac-mono" 
+          then "--module mac-il2cpp"
           else "--module linux-il2cpp";
 
         # Platform-specific Unity Hub command
         unityHubCmd = if pkgs.stdenv.isDarwin
-          then "/Applications/Unity Hub.app/Contents/MacOS/Unity Hub"
+          then "/Applications/Unity\\ Hub.app/Contents/MacOS/Unity\\ Hub"
           else "${pkgs.unityhub}/bin/unityhub";
 
         # Linux-specific libraries
@@ -80,16 +87,18 @@
             }
             
             echo "Unity development environment ready"
+            echo "Architecture: ${arch}"
             
             ${if !stdenv.isDarwin then ''
               # Linux-specific environment setup
               export LD_LIBRARY_PATH=${lib.makeLibraryPath (linuxLibs ++ commonLibs)}:$LD_LIBRARY_PATH
               export XDG_DATA_DIRS=${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:${gtk3}/share/gsettings-schemas/${gtk3.name}:$XDG_DATA_DIRS
               export AUTO_PATCHELF_LIBS=${lib.makeLibraryPath (linuxLibs ++ commonLibs)}
-            '' else ''''}
-            
-            echo "\nInstalling Unity ${unityVersion} with platform support if not present..."
-            unityhub -- --headless install --version ${unityVersion} ${unityModule} --changeset ${changeset} 2>/dev/null || true
+              echo "Installing Unity ${unityVersion} with platform support if not present..."
+              unityhub -- --headless install --version ${unityVersion} --changeset ${changeset} --architecture ${arch} ${unityModule}
+            '' else ''
+              echo "Install the right version of Unity manually, the one I assume you use is ${unityVersion}"
+            ''}
           '';
         };
       }
