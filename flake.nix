@@ -22,58 +22,38 @@
           then "--module mac-mono" 
           else "--module linux-il2cpp";
 
-        # Graphics libraries and runtime dependencies
-        runtimeLibs = with pkgs; [
-          # Graphics
-          libGL
-          libGLU
-          vulkan-loader
-          
-          # X11
+        # Linux-specific libraries
+        linuxLibs = with pkgs; [
+          # X11 and display
           xorg.libX11
           xorg.libXcursor
-          xorg.libXinerama
           xorg.libXrandr
           xorg.libXi
-          xorg.libXext
-          xorg.libXfixes
-          xorg.libXrender
-          xorg.libXcomposite
-          xorg.libXdamage
           
-          # Audio
-          alsa-lib
-          libpulseaudio
-          
-          # System and UI
+          # UI toolkit
           gtk3
+          gdk-pixbuf
+          cairo
+          pango
+          libGL
+          
+          # System
           glib
           icu
-          zlib
-          
-          # Additional runtime deps
-          libglvnd
-          libdrm
-          mesa
-          mesa.drivers
-          
-          # Unity specific
-          udev
           systemd
         ];
 
-        # Debug tools
-        debugTools = with pkgs; [
-          strace
-          ltrace
-          binutils  # for readelf
+        # macOS-specific libraries and tools
+        macLibs = with pkgs; [
+          darwin.apple_sdk.frameworks.CoreServices
+          darwin.cctools  # For install_name_tool
         ];
 
-        # macOS specific tools
-        darwinTools = with pkgs; [
-          darwin.apple_sdk.frameworks.CoreServices
-          darwin.cctools  # Provides install_name_tool
+        # Common libraries for both platforms
+        commonLibs = with pkgs; [
+          zlib
         ];
+
       in
       with pkgs;    
       {
@@ -84,47 +64,21 @@
             (import ./python.nix { python = python311; })
             autoPatchelfHook
             patchelf
-          ] ++ debugTools
-          ++ (if stdenv.isDarwin then darwinTools else runtimeLibs);
+          ] ++ commonLibs
+          ++ (if stdenv.isDarwin then macLibs else linuxLibs);
 
           shellHook = ''
             echo "Unity development environment ready"
             
-            # Set up runtime environment
-            export LD_LIBRARY_PATH=${lib.makeLibraryPath runtimeLibs}:$LD_LIBRARY_PATH
-            
-            # Unity specific environment variables
-            export UNITY_ENABLE_GRAPHICS=1
-            export UNITY_ENABLE_AUDIO=1
-            
-            # GTK environment setup
-            export XDG_DATA_DIRS=${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:${gtk3}/share/gsettings-schemas/${gtk3.name}:$XDG_DATA_DIRS
-            
-            # Export library paths for autopatchelf
-            export AUTO_PATCHELF_LIBS=${lib.makeLibraryPath runtimeLibs}
+            ${if !stdenv.isDarwin then ''
+              # Linux-specific environment setup
+              export LD_LIBRARY_PATH=${lib.makeLibraryPath (linuxLibs ++ commonLibs)}:$LD_LIBRARY_PATH
+              export XDG_DATA_DIRS=${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:${gtk3}/share/gsettings-schemas/${gtk3.name}:$XDG_DATA_DIRS
+              export AUTO_PATCHELF_LIBS=${lib.makeLibraryPath (linuxLibs ++ commonLibs)}
+            '' else ''''}
             
             echo "\nInstalling Unity ${unityVersion} with platform support if not present..."
             unityhub -- --headless install --version ${unityVersion} ${unityModule} --changeset ${changeset} 2>/dev/null || true
-
-            chmod +x buildScript.sh
-
-            # Debug helper functions
-            check_binary() {
-              echo "Checking binary dependencies..."
-              ldd ./Builds/Sim.x86_64
-              echo "\nChecking for missing symbols..."
-              ldd -r ./Builds/Sim.x86_64
-            }
-
-            trace_run() {
-              echo "Running with strace..."
-              strace -f ./Builds/Sim.x86_64 2>strace.log
-            }
-
-            debug_libs() {
-              echo "Debugging library loading..."
-              LD_DEBUG=libs,files ./Builds/Sim.x86_64 2>libs_debug.log
-            }
           '';
         };
       }
