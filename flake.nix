@@ -22,6 +22,11 @@
           then "--module mac-mono" 
           else "--module linux-il2cpp";
 
+        # Platform-specific Unity Hub command
+        unityHubCmd = if pkgs.stdenv.isDarwin
+          then "/Applications/Unity Hub.app/Contents/MacOS/Unity Hub"
+          else "${pkgs.unityhub}/bin/unityhub";
+
         # Linux-specific libraries
         linuxLibs = with pkgs; [
           # X11 and display
@@ -36,6 +41,8 @@
           cairo
           pango
           libGL
+
+          unityhub
           
           # System
           glib
@@ -60,7 +67,6 @@
         devShell = mkShell {
           UNITY_VERSION = "${unityVersion}${changeset}";
           buildInputs = [
-            unityhub
             (import ./python.nix { python = python311; })
             autoPatchelfHook
             patchelf
@@ -68,6 +74,11 @@
           ++ (if stdenv.isDarwin then macLibs else linuxLibs);
 
           shellHook = ''
+            # Set up Unity Hub command
+            unityhub() {
+              ${unityHubCmd} "$@"
+            }
+            
             echo "Unity development environment ready"
             
             ${if !stdenv.isDarwin then ''
