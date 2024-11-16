@@ -9,7 +9,7 @@ import math
 parent_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 print("Parent directory path:", parent_directory)
 
-env_path = parent_directory + "/Mac.app"
+env_path = parent_directory + "/Builds/sim"
 racecar = RacecarMLAgent(env_path, time_scale=1.0)
 
 speed = 0

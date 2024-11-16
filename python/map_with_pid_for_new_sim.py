@@ -10,7 +10,7 @@ from typing import Any, Tuple
 current_directory = os.path.dirname(os.path.abspath(__file__))
 print("Current directory path:", current_directory)
 
-env_path = current_directory + "/../Sim.x86_64"
+env_path = current_directory + "/../Builds/sim"
 racecar = RacecarMLAgent(env_path, time_scale=1.0)
 
 ########################################################################################

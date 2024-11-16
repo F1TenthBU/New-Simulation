@@ -19,6 +19,7 @@ let
       h5py
       numpy
       distutils
+      protobuf
     ];
     
     doCheck = false;
