@@ -22,42 +22,6 @@ get_build_output() {
     fi
 }
 
-# Function to patch the built binary
-patch_binary() {
-    local BUILD_PATH=$1
-    if [[ "$OSTYPE" == "linux"* ]]; then
-        echo "Patching Linux binary with autopatchelf..."
-        
-        # Make sure the binary is executable
-        chmod +x "$BUILD_PATH"
-        
-        # Patch the binary and its dependencies
-        find "$(dirname "$BUILD_PATH")" -type f -executable -exec patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" {} \; 2>/dev/null || true
-        
-        # Use autoPatchelfHook if available
-        if command -v autopatchelf &> /dev/null; then
-            autopatchelf "$BUILD_PATH"
-        fi
-        
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        echo "Patching macOS binary..."
-        
-        # Make sure the binary and app bundle are executable
-        chmod +x "$BUILD_PATH"
-        chmod -R +x "$(dirname "$(dirname "$(dirname "$BUILD_PATH")")")"
-        
-        # On macOS, we need to update the rpath
-        if command -v install_name_tool &> /dev/null; then
-            # Add rpath to Frameworks directory
-            install_name_tool -add_rpath "@executable_path/../Frameworks" "$BUILD_PATH" 2>/dev/null || true
-            # Add rpath to Libraries directory
-            install_name_tool -add_rpath "@executable_path/../Libraries" "$BUILD_PATH" 2>/dev/null || true
-        fi
-    fi
-    
-    echo "Patching complete"
-}
-
 # Function to build Unity project
 build_unity_project() {
     local PROJECT_PATH=$1
@@ -85,23 +49,13 @@ build_unity_project() {
         -executeMethod Builder.Build \
         -logFile "$PROJECT_PATH/Builds/build.log"
 
-    # Check if build was successful and patch accordingly
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        if [ -d "$PROJECT_PATH/Builds/Sim.app" ]; then
-            echo "Build successful! Output at: $PROJECT_PATH/Builds/Sim.app"
-            patch_binary "$PROJECT_PATH/$BUILD_OUTPUT"
-        else
-            echo "Build failed! Check $PROJECT_PATH/Builds/build.log for details"
-            exit 1
-        fi
+    # Check if build was successful and wrap accordingly
+    if [ -f "$PROJECT_PATH/$BUILD_OUTPUT" ]; then
+        echo "Build successful! Output at: $PROJECT_PATH/$BUILD_OUTPUT"
+        wrap-unity-binary "$PROJECT_PATH/$BUILD_OUTPUT" "$PROJECT_PATH/Builds/sim"
     else
-        if [ -f "$PROJECT_PATH/$BUILD_OUTPUT" ]; then
-            echo "Build successful! Output at: $PROJECT_PATH/$BUILD_OUTPUT"
-            patch_binary "$PROJECT_PATH/$BUILD_OUTPUT"
-        else
-            echo "Build failed! Check $PROJECT_PATH/Builds/build.log for details"
-            exit 1
-        fi
+        echo "Build failed! Check $PROJECT_PATH/Builds/build.log for details"
+        exit 1
     fi
 }
 
