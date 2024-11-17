@@ -6,6 +6,7 @@ UNITY_VERSION = $(UNITY_BASE_VERSION)f$(UNITY_CHANGESET)
 
 # Local Unity installation directory
 LOCAL_UNITY_DIR = .unity
+UNITY_DOWNLOAD = $(LOCAL_UNITY_DIR)/Unity-$(UNITY_VERSION)
 
 # OS-specific settings
 ifeq ($(shell uname),Darwin)
@@ -13,33 +14,41 @@ ifeq ($(shell uname),Darwin)
 	UNITY_URL = https://download.unity3d.com/download_unity/$(UNITY_HASH)/MacEditorInstaller$(if $(filter arm64,$(ARCH)),Arm64,)/Unity-$(UNITY_VERSION).pkg
 	UNITY_EDITOR = $(LOCAL_UNITY_DIR)/Unity.app/Contents/MacOS/Unity
 	BUILD_OUTPUT = Builds/Sim.app/Contents/MacOS/Simulation
+	UNITY_ARCHIVE = $(LOCAL_UNITY_DIR)/Unity.pkg
 else
 	ARCH = $(shell if [ "$$(uname -m)" = "aarch64" ]; then echo "arm64"; else echo "x86_64"; fi)
 	UNITY_URL = https://download.unity3d.com/download_unity/$(UNITY_HASH)/LinuxEditorInstaller/Unity-$(UNITY_VERSION).tar.xz
 	UNITY_EDITOR = $(LOCAL_UNITY_DIR)/Editor/Unity
 	BUILD_OUTPUT = Builds/Sim.x86_64
+	UNITY_ARCHIVE = $(LOCAL_UNITY_DIR)/Unity.tar.xz
 endif
 
-.PHONY: all clean install-unity build wrap
+.PHONY: all clean download-unity install-unity build wrap
 
 all: build
 
-install-unity:
-	@echo "Checking Unity version $(UNITY_VERSION)"
+download-unity:
+	@echo "Downloading Unity $(UNITY_VERSION)..."
+	@mkdir -p $(LOCAL_UNITY_DIR)
+	@if [ ! -f "$(UNITY_ARCHIVE)" ]; then \
+		curl -L $(UNITY_URL) -o $(UNITY_ARCHIVE); \
+	else \
+		echo "Unity archive already downloaded"; \
+	fi
+
+install-unity: download-unity
+	@echo "Installing Unity $(UNITY_VERSION)..."
 	@if [ ! -f "$(UNITY_EDITOR)" ]; then \
-		mkdir -p $(LOCAL_UNITY_DIR); \
-		echo "Downloading Unity $(UNITY_VERSION)..."; \
-		curl -L $(UNITY_URL) -o $(LOCAL_UNITY_DIR)/Unity.$(if $(filter Darwin,$(shell uname)),pkg,tar.xz); \
-		echo "Extracting Unity..."; \
 		if [ "$(shell uname)" = "Darwin" ]; then \
-			pkgutil --expand $(LOCAL_UNITY_DIR)/Unity.pkg $(LOCAL_UNITY_DIR)/tmp; \
+			pkgutil --expand $(UNITY_ARCHIVE) $(LOCAL_UNITY_DIR)/tmp; \
 			cd $(LOCAL_UNITY_DIR)/tmp && cat Unity.pkg/Payload | gzip -d | cpio -id; \
 			mv $(LOCAL_UNITY_DIR)/tmp/Applications/Unity $(LOCAL_UNITY_DIR)/Unity.app; \
-			rm -rf $(LOCAL_UNITY_DIR)/tmp $(LOCAL_UNITY_DIR)/Unity.pkg; \
+			rm -rf $(LOCAL_UNITY_DIR)/tmp; \
 		else \
-			tar xf $(LOCAL_UNITY_DIR)/Unity.tar.xz -C $(LOCAL_UNITY_DIR); \
-			rm $(LOCAL_UNITY_DIR)/Unity.tar.xz; \
+			tar xf $(UNITY_ARCHIVE) -C $(LOCAL_UNITY_DIR); \
 		fi \
+	else \
+		echo "Unity $(UNITY_VERSION) is already installed"; \
 	fi
 
 build: install-unity

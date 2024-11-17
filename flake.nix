@@ -39,7 +39,7 @@
       {
         devShell = mkShell {
           buildInputs = [
-            (import ./python.nix { python = python311; })
+            (import ./python.nix { python = python310; })
             autoPatchelfHook
             patchelf
             zlib

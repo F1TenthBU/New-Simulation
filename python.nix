@@ -1,5 +1,6 @@
 { python }: with python; with python.pkgs;
 let 
+  protobuf = python.pkgs.callPackage ./protoboeuf.nix { };
   mlagents_envs = buildPythonPackage rec {
     pname = "mlagents_envs";
     version = "1.1.0";
@@ -15,7 +16,7 @@ let
     };
     
     propagatedBuildInputs = [
-      grpcio
+      (grpcio.override { inherit protobuf; })
       h5py
       numpy
       distutils
