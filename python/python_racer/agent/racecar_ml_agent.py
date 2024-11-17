@@ -4,9 +4,22 @@ from mlagents_envs.base_env import ActionTuple
 import numpy as np
 import threading
 import time
+import os
+from pathlib import Path
+
+def get_project_root():
+    """Returns project root folder."""
+    return str(Path(__file__).parents[3])
+
+def get_sim_path():
+    """Returns the default path to the simulation executable."""
+    root = get_project_root()
+    return os.path.join(root, "Builds", "sim")
 
 class RacecarMLAgent:
-    def __init__(self, env_path, time_scale=1.0):
+    def __init__(self, env_path=None, time_scale=1.0):
+        if env_path is None:
+            env_path = get_sim_path()
         self.engine_configuration_channel = EngineConfigurationChannel()
         self.env = UnityEnvironment(file_name=env_path, side_channels=[self.engine_configuration_channel])
         self.engine_configuration_channel.set_configuration_parameters(time_scale=time_scale)
@@ -43,7 +56,6 @@ class RacecarMLAgent:
                 
             # Step the environment
             self.env.step()
-            time.sleep(0.01)  # update at 100 Hz
 
     def start(self):
         self.running = True

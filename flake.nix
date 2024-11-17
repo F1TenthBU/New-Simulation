@@ -21,7 +21,7 @@
             darwin.cctools
           ];
           setupScript = '''';
-        } else if pkgs.stdenv.isLinux then {
+        } else {
           libs = with pkgs; [
             xorg.libX11
             xorg.libXcursor
@@ -41,7 +41,7 @@
             export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath platformSettings.libs}:$LD_LIBRARY_PATH
             export RUNTIME_DEPS="${pkgs.lib.makeLibraryPath platformSettings.libs}"
           '';
-        } else throw "Unsupported system";
+        };
 
       in
       with pkgs;    
@@ -58,6 +58,8 @@
             ${if pkgs.stdenv.isLinux then ''
               ${platformSettings.setupScript}
             '' else ''''}
+            # Add python directory to PYTHONPATH
+            export PYTHONPATH=$PWD/python:$PYTHONPATH
             chmod +x buildScript.sh
           '';
         };

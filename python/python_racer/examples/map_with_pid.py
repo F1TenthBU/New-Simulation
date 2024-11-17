@@ -1,5 +1,5 @@
 # Example usage of RacecarMLAgent class:
-from racecar_ml_agent import RacecarMLAgent
+from python_racer.agent.racecar_ml_agent import RacecarMLAgent
 import sys, time, os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,11 +7,7 @@ import math
 from nptyping import NDArray
 from typing import Any, Tuple
 
-current_directory = os.path.dirname(os.path.abspath(__file__))
-print("Current directory path:", current_directory)
-
-env_path = current_directory + "/../Builds/sim"
-racecar = RacecarMLAgent(env_path, time_scale=1.0)
+racecar = RacecarMLAgent()
 
 ########################################################################################
 # Global variables

@@ -1,13 +1,8 @@
 # Example usage of RacecarMLAgent class:
 import time
-from racecar_ml_agent import RacecarMLAgent
-import os
+from python_racer.agent.racecar_ml_agent import RacecarMLAgent
 
-parent_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-print("Parent directory path:", parent_directory)
-
-env_path = parent_directory + "/Builds/sim"
-racecar = RacecarMLAgent(env_path, time_scale=1.0)
+racecar = RacecarMLAgent()
 
 speed = 0
 angle = 0
