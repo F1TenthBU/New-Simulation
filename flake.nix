@@ -14,25 +14,34 @@
           config.allowUnfree = true;
         };
         
-        # Runtime libraries
-        runtimeLibs = with pkgs; if stdenv.isDarwin then [
-          darwin.apple_sdk.frameworks.CoreServices
-          darwin.cctools
-        ] else [
-          xorg.libX11
-          xorg.libXcursor
-          xorg.libXrandr
-          xorg.libXi
-          gtk3
-          gdk-pixbuf
-          cairo
-          pango
-          libGL
-          glib
-          icu
-          systemd
-          unityhub
-        ];
+        # Platform-specific settings
+        platformSettings = if pkgs.stdenv.isDarwin then {
+          libs = with pkgs; [
+            darwin.apple_sdk.frameworks.CoreServices
+            darwin.cctools
+          ];
+          setupScript = '''';
+        } else if pkgs.stdenv.isLinux then {
+          libs = with pkgs; [
+            xorg.libX11
+            xorg.libXcursor
+            xorg.libXrandr
+            xorg.libXi
+            gtk3
+            gdk-pixbuf
+            cairo
+            pango
+            libGL
+            glib
+            icu
+            systemd
+            zlib
+          ];
+          setupScript = ''
+            export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath platformSettings.libs}:$LD_LIBRARY_PATH
+            export RUNTIME_DEPS="${pkgs.lib.makeLibraryPath platformSettings.libs}"
+          '';
+        } else throw "Unsupported system";
 
       in
       with pkgs;    
@@ -42,15 +51,15 @@
             (import ./python.nix { python = python310; })
             autoPatchelfHook
             patchelf
-            zlib
-          ] ++ runtimeLibs;
+          ] ++ platformSettings.libs;
 
-          shellHook =
-            if !stdenv.isDarwin then ''
-              export LD_LIBRARY_PATH=${lib.makeLibraryPath runtimeLibs}:$LD_LIBRARY_PATH
-              export AUTO_PATCHELF_LIBS=${lib.makeLibraryPath runtimeLibs}
-            ''
-            else "";
+          shellHook = ''
+            echo "Unity development environment ready"
+            ${if pkgs.stdenv.isLinux then ''
+              ${platformSettings.setupScript}
+            '' else ''''}
+            chmod +x buildScript.sh
+          '';
         };
       }
     );
