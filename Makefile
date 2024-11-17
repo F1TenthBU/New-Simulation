@@ -36,7 +36,7 @@ $(UNITY_EDITOR): $(UNITY_ARCHIVE)
 	@echo "Installing Unity $(UNITY_VERSION)..."
 	@if [ "$(shell uname)" = "Darwin" ]; then \
 		pkgutil --expand-full $(UNITY_ARCHIVE) $(LOCAL_UNITY_DIR)/tmp; \
-		mv $(LOCAL_UNITY_DIR)/tmp/Unity/Unity.app $(LOCAL_UNITY_DIR)/Unity.app; \
+		mv $(LOCAL_UNITY_DIR)/tmp/Unity.pkg.tmp/Payload/Unity.app $(LOCAL_UNITY_DIR)/Unity.app; \
 		rm -rf $(LOCAL_UNITY_DIR)/tmp; \
 		touch $@; \
 	else \
