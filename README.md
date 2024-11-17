@@ -4,6 +4,24 @@ This repo has our brand new simulation, with our own physics and size of the rac
 This will helps with streamline the ML learning process.
 
 # Getting ready:
+
+## Using Nix (Recommended)
+1. Install Nix using the Determinate Systems installer:
+   ```bash
+   curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
+   ```
+2. Log out and back in to ensure Nix is properly initialized
+3. Clone this repository and cd to that directory
+4. Enter the development environment:
+   ```bash
+   nix develop
+   ```
+5. Build the simulation:
+   ```bash
+   make
+   ```
+
+## Legacy Setup (Using Conda)
 0. Clone this repository and cd to that directory.
 1. Create conda envrionment on that folder to keep the python side consistant: `conda env create -f environment.yml && conda activate mlagents`
     
@@ -13,9 +31,20 @@ This will helps with streamline the ML learning process.
     
     You should be able to run `mlagents-learn --help` in the conda envrionment.
 3. Open the repository in Unity. Select the Unity version as suggested. This ensures that the version control won't get messed up.
-4. After you opened it, go to "File"-->"Build and Run" to build the app. Alternatively, you can press "Command + B" for this step. You can use the keyboard to drive the car around the sample track. After that, you can close this app.
-5. Now, cd to python directory `cd python`. And now, run racecar_ml_agent_template.py file to make sure your python can communicate with the Unity: `python racecar_ml_agent_template.py`. This should open up the app again, and if the app doesn't crash, you are good to go for your own algorithm.
+4. After you opened it, go to "File"-->"Build and Run" to build the app. Alternatively, you can press "Command + B" for this step.
 
+# Running the Simulation
+You can run the simulation in two ways:
+1. Run the built simulation directly:
+   ```bash
+   ./Builds/sim
+   ```
+2. Run with Python control:
+   ```bash
+   cd python && python gaussianForNewSim.py
+   ```
+
+You can use the keyboard to drive the car around the sample track.
 
 # How to Train with native ML Agent in Unity:
 Use command `mlagents-learn {NNParameter.yaml} --run-id={a unique name for this training session}`
@@ -30,4 +59,4 @@ When the message "Start training by pressing the Play button in the Unity Editor
 
 ### Code reference from the MIT simulation:
 * Lidar object and Lidar script (Lidar.cs)
-* Basic Racecar script and its associated CameraModule class and Controller class (tho we don't need the latter)
+* Basic Racecar script and its associated CameraModule class
