@@ -23,35 +23,27 @@ else
 	UNITY_ARCHIVE = $(LOCAL_UNITY_DIR)/Unity.tar.xz
 endif
 
-.PHONY: all clean download-unity install-unity build wrap
+.PHONY: all clean install-unity build wrap
 
 all: build
 
-download-unity:
+$(UNITY_ARCHIVE):
 	@echo "Downloading Unity $(UNITY_VERSION)..."
 	@mkdir -p $(LOCAL_UNITY_DIR)
-	@if [ ! -f "$(UNITY_ARCHIVE)" ]; then \
-		curl -L $(UNITY_URL) -o $(UNITY_ARCHIVE); \
-	else \
-		echo "Unity archive already downloaded"; \
-	fi
+	@curl -L $(UNITY_URL) -o $@
 
-install-unity: download-unity
+$(UNITY_EDITOR): $(UNITY_ARCHIVE)
 	@echo "Installing Unity $(UNITY_VERSION)..."
-	@if [ ! -f "$(UNITY_EDITOR)" ]; then \
-		if [ "$(shell uname)" = "Darwin" ]; then \
-			pkgutil --expand $(UNITY_ARCHIVE) $(LOCAL_UNITY_DIR)/tmp; \
-			cd $(LOCAL_UNITY_DIR)/tmp && cat Unity.pkg/Payload | gzip -d | cpio -id; \
-			mv $(LOCAL_UNITY_DIR)/tmp/Applications/Unity $(LOCAL_UNITY_DIR)/Unity.app; \
-			rm -rf $(LOCAL_UNITY_DIR)/tmp; \
-		else \
-			tar xf $(UNITY_ARCHIVE) -C $(LOCAL_UNITY_DIR); \
-		fi \
+	@if [ "$(shell uname)" = "Darwin" ]; then \
+		pkgutil --expand $(UNITY_ARCHIVE) $(LOCAL_UNITY_DIR)/tmp; \
+		cd $(LOCAL_UNITY_DIR)/tmp && gunzip < Unity.pkg.tmp/Payload | cpio -id; \
+		mv $(LOCAL_UNITY_DIR)/tmp/Unity/Unity.app $(LOCAL_UNITY_DIR)/Unity.app; \
+		rm -rf $(LOCAL_UNITY_DIR)/tmp; \
 	else \
-		echo "Unity $(UNITY_VERSION) is already installed"; \
+		tar xf $(UNITY_ARCHIVE) -C $(LOCAL_UNITY_DIR); \
 	fi
 
-build: install-unity
+build: $(UNITY_EDITOR)
 	@echo "Building project..."
 	@mkdir -p Builds
 	@$(UNITY_EDITOR) \
