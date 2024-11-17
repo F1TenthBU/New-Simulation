@@ -49,13 +49,19 @@ $(BUILD_OUTPUT): $(UNITY_EDITOR)
 		-logFile "$(CURDIR)/Builds/build.log"
 
 Builds/sim: $(BUILD_OUTPUT)
-	@cd Builds && \
-	if [ "$(shell uname)" = "Linux" ]; then \
+	@if [ "$(shell uname)" = "Darwin" ]; then \
+		echo '#!/bin/bash' > $@; \
+		echo 'SCRIPT_DIR="$$(cd "$$(dirname "$${BASH_SOURCE[0]}")" && pwd)"' >> $@; \
+		echo 'export DYLD_FRAMEWORK_PATH="$$SCRIPT_DIR/Sim.app/Contents/Frameworks:$$DYLD_FRAMEWORK_PATH"' >> $@; \
+		echo 'exec "$$SCRIPT_DIR/$(RELATIVE_PATH)" "$$@"' >> $@; \
+	else \
+		cd Builds && \
 		patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(RELATIVE_PATH) && \
 		patchelf --force-rpath --set-rpath '$$ORIGIN:$(RUNTIME_DEPS)' $(RELATIVE_PATH) && \
-		patchelf --force-rpath --set-rpath '$$ORIGIN:$(RUNTIME_DEPS)' UnityPlayer.so; \
-	fi && \
-	ln -sf $(RELATIVE_PATH) sim
+		patchelf --force-rpath --set-rpath '$$ORIGIN:$(RUNTIME_DEPS)' UnityPlayer.so && \
+		ln -sf $(RELATIVE_PATH) sim; \
+	fi
+	@chmod +x $@
 
 .PHONY: clean
 clean:
