@@ -36,6 +36,7 @@ class GameState(SceneState):
     mouse_pos: Optional[np.ndarray] = None
     last_placed_pos: Optional[np.ndarray] = None
     arc: Optional[Arc] = None
+    _instance_data_buffer: np.ndarray = None  # Pre-allocated buffer
 
     @staticmethod
     def create(width: int, height: int, canvas: WgpuCanvas, device: wgpu.GPUDevice) -> 'GameState':
@@ -64,6 +65,13 @@ class GameState(SceneState):
             }]
         )
 
+        # Pre-allocate instance data buffer
+        instance_data_buffer = np.zeros(2_000_000, dtype=np.dtype([
+            ('pos', np.float32, 2),
+            ('std', np.float32, 1),
+            ('intensity', np.float32, 1),
+        ]))
+
         return GameState(
             view=ViewTransform.create(width, height),
             gaussians=gaussians,
@@ -77,7 +85,8 @@ class GameState(SceneState):
             instance_buffer=instance_buffer,
             arc_buffer=arc_buffer,
             view_uniform_buffer=view_uniform_buffer,
-            colormap_bind_group_layout=colormap_bind_group_layout
+            colormap_bind_group_layout=colormap_bind_group_layout,
+            _instance_data_buffer=instance_data_buffer
         )
 
     def update_lidar(self, lidar_samples: np.ndarray, sigma: float = 1.0) -> Optional['GameState']:
@@ -126,21 +135,13 @@ class GameState(SceneState):
             usage=wgpu.TextureUsage.RENDER_ATTACHMENT | wgpu.TextureUsage.TEXTURE_BINDING
         )
             
-        # Update instance data - use same size as pre-allocated buffer
-        max_instances = 2_000_000
-        instance_data = np.zeros(max_instances, dtype=np.dtype([
-            ('pos', np.float32, 2),
-            ('std', np.float32, 1),
-            ('intensity', np.float32, 1),
-        ]))
-        
-        # Fill with actual data
-        instance_data['pos'][:len(self.gaussians.pos)] = self.gaussians.pos
-        instance_data['std'][:len(self.gaussians.pos)] = self.gaussians.std
-        instance_data['intensity'][:len(self.gaussians.pos)] = self.gaussians.intensity
+        # Update instance data using pre-allocated buffer
+        self._instance_data_buffer['pos'][:len(self.gaussians.pos)] = self.gaussians.pos
+        self._instance_data_buffer['std'][:len(self.gaussians.pos)] = self.gaussians.std
+        self._instance_data_buffer['intensity'][:len(self.gaussians.pos)] = self.gaussians.intensity
         
         # Update buffers
-        self.device.queue.write_buffer(self.instance_buffer, 0, instance_data.tobytes())
+        self.device.queue.write_buffer(self.instance_buffer, 0, self._instance_data_buffer.tobytes())
         self.device.queue.write_buffer(
             self.view_uniform_buffer, 
             0, 
@@ -207,12 +208,12 @@ class GameState(SceneState):
             render_pass = command_encoder.begin_render_pass(
                 color_attachments=[{
                     "view": current_texture.create_view(),
-                    "load_op": wgpu.LoadOp.load,  # Don't clear
+                    "load_op": wgpu.LoadOp.load,
                     "store_op": wgpu.StoreOp.store,
                 }]
             )
             render_pass.set_pipeline(self.arc_pipeline)
-            render_pass.set_bind_group(0, self.bind_group)  # Use same view transform
+            render_pass.set_bind_group(0, self.bind_group)
             render_pass.set_vertex_buffer(0, self.arc_buffer)
             render_pass.draw(len(self.arc.points), 1)
             render_pass.end()
