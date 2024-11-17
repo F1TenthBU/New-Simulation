@@ -35,13 +35,12 @@ $(UNITY_ARCHIVE):
 $(UNITY_EDITOR): $(UNITY_ARCHIVE)
 	@echo "Installing Unity $(UNITY_VERSION)..."
 	@if [ "$(shell uname)" = "Darwin" ]; then \
-		pkgutil --expand $(UNITY_ARCHIVE) $(LOCAL_UNITY_DIR)/tmp; \
-		cd $(LOCAL_UNITY_DIR)/tmp && cat Unity.pkg/Payload | gzip -d | cpio -id; \
-		mv $(LOCAL_UNITY_DIR)/tmp/Applications/Unity $(LOCAL_UNITY_DIR)/Unity.app; \
+		pkgutil --expand-full $(UNITY_ARCHIVE) $(LOCAL_UNITY_DIR)/tmp; \
+		mv $(LOCAL_UNITY_DIR)/tmp/Unity/Unity.app $(LOCAL_UNITY_DIR)/Unity.app; \
 		rm -rf $(LOCAL_UNITY_DIR)/tmp; \
 		touch $@; \
 	else \
-		tar xf $(UNITY_ARCHIVE) -C $(LOCAL_UNITY_DIR); \
+		tar --use-compress-program="xz -T0" -xf $(UNITY_ARCHIVE) -C $(LOCAL_UNITY_DIR); \
 		touch $@; \
 	fi
 
