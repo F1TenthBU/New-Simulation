@@ -14,7 +14,7 @@ public class Lidar : RacecarModule
     public const int NumSamples = 1440;
 
     private const int forwardSampleRange = 10; // Number of samples to check in the forward direction
-    private const float clearDistanceThreshold = 50.0f; // Distance threshold to consider as clear (in dm)
+    private const float clearDistanceThreshold = 50.0f; // Distance threshold to consider as clear (in cm)
 
     /// <summary>
     /// The frequency of the LIDAR motor in hz.
@@ -25,6 +25,12 @@ public class Lidar : RacecarModule
     /// The number of sample taken per second.
     /// </summary>
     private const int samplesPerSecond = Lidar.NumSamples * Lidar.motorFrequency;
+
+    /// <summary>
+    /// The angle at which the LIDAR starts taking samples (in degrees).
+    /// Based on the Hokuyo Lidar datasheet.
+    /// </summary>
+    private const int startAngle = 135;
 
     /// <summary>
     /// The minimum distance that can be detected (in m).
@@ -67,7 +73,7 @@ public class Lidar : RacecarModule
 
     #region Public Interface
     /// <summary>
-    /// The distance (in dm) of each angle sample.
+    /// The distance (in cm) of each angle sample.
     /// </summary>
     public float[] Samples { get; private set; }
 
@@ -96,9 +102,9 @@ public class Lidar : RacecarModule
         float length = Mathf.Min(texture.width / 2.0f, texture.height / 2.0f);
         for (int i = 0; i < this.Samples.Length; i++)
         {
-            if (this.Samples[i] != Lidar.minCode && this.Samples[i] != Lidar.maxCode && this.Samples[i] < Lidar.visualizationRange * 100)
+            if (this.Samples[i] < Lidar.visualizationRange * 100)
             {
-                float angle = 2 * Mathf.PI * i / Lidar.NumSamples;
+                float angle = 2 * Mathf.PI * i / Lidar.NumSamples - Mathf.Deg2Rad * Lidar.startAngle;
                 Vector2 point = center + this.Samples[i] / 100 / Lidar.visualizationRange * length * new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
                 rawData[(int)point.y * texture.width + (int)point.x] = Color.red;
             }
@@ -141,9 +147,9 @@ public class Lidar : RacecarModule
         while (curSample != lastSample)
         {
             float lidar_angle = curSample * 360.0f / Lidar.NumSamples;
-            this.transform.localRotation = Quaternion.Euler(0, lidar_angle, 0);
+            this.transform.localRotation = Quaternion.Euler(0, lidar_angle - startAngle, 0);
             // don't read the backward direction
-            if (lidar_angle < 135 || lidar_angle > 225)
+            if (lidar_angle < 270)
             {
                 this.Samples[curSample] = TakeSample();
             } else {
@@ -176,12 +182,12 @@ public class Lidar : RacecarModule
     /// <returns>True if the forward direction is clear, false otherwise.</returns>
     public bool IsForwardClear()
     {
-        int forwardIndex = 0;
+        int forwardIndex = Lidar.startAngle * Lidar.NumSamples / 360;
+        Debug.Log(forwardIndex);
 
         for (int i = forwardSampleRange; i <= forwardSampleRange; i++)
         {
-            int index = (forwardIndex + i + NumSamples) % NumSamples;
-            if (this.Samples[index] < clearDistanceThreshold)
+            if (this.Samples[i] < clearDistanceThreshold)
             {
                 return false;
             }

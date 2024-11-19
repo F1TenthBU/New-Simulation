@@ -32,9 +32,9 @@ public class RacecarAgent : Agent
 
         // Add the racecar's Lidar data to the observations
         float[] lidarSamples = racecar.Lidar.Samples;
-        foreach (float sample in lidarSamples)
+        for (int i = 0; i < 1080; i++)
         {
-            sensor.AddObservation(sample);
+            sensor.AddObservation(lidarSamples[i]);
         }
 
         // Punish the agent for colliding with obstacles
