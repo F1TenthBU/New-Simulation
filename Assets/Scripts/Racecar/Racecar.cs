@@ -169,6 +169,8 @@ public class Racecar : MonoBehaviour
 
         // Test out Lidar data:
         // Debug.Log(this.Lidar.Samples);
+        // Debug.Log(this.Lidar.Samples[0]);
+        // Debug.Log(this.Lidar.Samples[540]);
         // Test out Lidar isForward
         // Debug.Log(this.Lidar.IsForwardClear());
     }
