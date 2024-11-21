@@ -63,7 +63,7 @@ public class Lidar : RacecarModule
     /// <summary>
     /// The maximum range displayed in the LIDAR visualization (in m).
     /// </summary>
-    private const float visualizationRange = 5;
+    private const float visualizationRange = 10;
 
     /// <summary>
     /// The Lidar visualization area on screen.
@@ -149,7 +149,7 @@ public class Lidar : RacecarModule
             float lidar_angle = curSample * 360.0f / Lidar.NumSamples;
             this.transform.localRotation = Quaternion.Euler(0, lidar_angle - startAngle, 0);
             // don't read the backward direction
-            if (lidar_angle < 270)
+            if (lidar_angle <= 270.25)
             {
                 this.Samples[curSample] = TakeSample();
             } else {
