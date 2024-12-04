@@ -359,6 +359,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfb9e5d84232c1847ba48614dbd8f713, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxSpeed: 5
   playerCameras: []
   chassisFront: {fileID: 6464425330067500309}
   chassisBack: {fileID: 2160719156226768052}
@@ -398,6 +399,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 472888cc92966304d929c80624863258, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  velocityText: {fileID: 0}
+  angularVelocityText: {fileID: 0}
 --- !u!114 &7006349214016194067
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1276,15 +1279,15 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4368511473121570782}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.123, z: 0.005}
+  m_LocalRotation: {x: 0, y: 0.92387956, z: 0, w: 0.38268343}
+  m_LocalPosition: {x: 0.0032608185, y: 0.123, z: 0.0058430703}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6687035719097599181}
   - {fileID: 434272883791481379}
   m_Father: {fileID: 5852043278337205636}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 135, z: 0}
 --- !u!114 &1190674054559305135
 MonoBehaviour:
   m_ObjectHideFlags: 0

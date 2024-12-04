@@ -29,41 +29,23 @@ public class RacecarAgent : Agent
         // Add the racecar's velocity to the observations
         sensor.AddObservation(racecar.Physics.LinearVelocity);
         sensor.AddObservation(racecar.Physics.AngularVelocity);
+        
+        // Add collision state (1.0 for collision, 0.0 for no collision)
+        sensor.AddObservation(racecar.Collided ? 1.0f : 0.0f);
 
         // Add the racecar's Lidar data to the observations
         float[] lidarSamples = racecar.Lidar.Samples;
-        foreach (float sample in lidarSamples)
+        for (int i = 0; i < 1081; i++)
         {
-            sensor.AddObservation(sample);
-        }
-
-        // Punish the agent for colliding with obstacles
-        if (racecar.Collided)
-        {
-            Debug.Log("Collision with wall. Starting new episode.");
-            EndEpisode();
-            SetReward(0);
+            sensor.AddObservation(lidarSamples[i]);
         }
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
+        // Apply received actions to the racecar
         racecar.Drive.Angle = actions.ContinuousActions[0];
         racecar.Drive.Speed = actions.ContinuousActions[1];
-
-        // Reward the agent for moving forward when lidar data shows no obstacles in front
-        if (racecar.Drive.Speed > 0 && racecar.Lidar.IsForwardClear())
-        {
-            AddReward(racecar.Drive.Speed / 10);
-        }
-
-        // Punish the agent for colliding with obstacles
-        if (racecar.Collided)
-        {
-            Debug.Log("Collision with wall. Starting new episode.");
-            EndEpisode();
-            SetReward(0);
-        }
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)

@@ -48,7 +48,7 @@
       {
         devShell = mkShell {
           buildInputs = [
-            (import ./python.nix { python = python310; })
+            (import ./python.nix { python = python310; pkgs = pkgs; })
             autoPatchelfHook
             patchelf
           ] ++ platformSettings.libs;

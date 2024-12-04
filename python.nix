@@ -1,4 +1,4 @@
-{ python }: with python; with python.pkgs;
+{ python, pkgs }: with python; with python.pkgs;
 let 
   protobuf = python.pkgs.callPackage ./protoboeuf.nix { };
   mlagents_envs = buildPythonPackage rec {
@@ -81,10 +81,82 @@ let
     doCheck = false;
   };
 
+  gymnasium = buildPythonPackage rec {
+    pname = "gymnasium";
+    version = "0.28.0";
+    format = "wheel";
+    src = fetchPypi {
+      inherit pname version;
+      format = "wheel";
+      dist = "py3";
+      python = "py3";
+      platform = "any";
+      sha256 = "sha256-sxUdXNKRhNXXwJwmBLr8o23zL7nOuuI9q+XnwOuD1eo=";
+    };
+  };
+
+  pylinalg = buildPythonPackage rec {
+    pname = "pylinalg";
+    version = "0.4.1";
+    format = "wheel";
+
+    src = fetchPypi {
+      inherit pname version;
+      format = "wheel";
+      dist = "py3";
+      python = "py3";
+      platform = "any";
+      sha256 = "sha256-9RL3rbI26ICODcnT4zVBgMRvc8KNq5zHGD+LR8iygI8=";
+    };
+
+    propagatedBuildInputs = [
+      numpy
+    ];
+
+    doCheck = false;
+  };
+
+
+  pygfx = buildPythonPackage rec {
+    pname = "pygfx";
+    version = "0.6.0";
+    format = "wheel";
+
+    src = fetchPypi {
+      inherit pname version;
+      format = "wheel";
+      dist = "py3";
+      python = "py3";
+      platform = "any";
+      sha256 = "sha256-8RNUOM5tlZasqoACVzy3geb6I0UsPQvLXjbOKu3SB2k=";
+    };
+
+    propagatedBuildInputs = [
+      pylinalg
+      numpy
+      (freetype-py.overridePythonAttrs (oldAttrs: {
+        version = "2.5.1";
+        src = pkgs.fetchFromGitHub {
+          owner = "rougier";
+          repo = "freetype-py";
+          rev = "v2.5.1";
+          sha256 = "sha256-lwb9cMKeLd8JIQdiMvFSWH+Wd1L9kmnw5R+7nwwBmjI=";
+        };
+      }))
+      uharfbuzz
+      jinja2
+      wgpu
+    ];
+
+    doCheck = false;
+  };
+
 in python.withPackages (ps: [
     matplotlib
     numpy
     nptyping
     mlagents
     wgpu
+    gymnasium
+    pygfx
   ])

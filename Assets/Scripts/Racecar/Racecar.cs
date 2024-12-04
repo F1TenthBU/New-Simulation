@@ -169,14 +169,20 @@ public class Racecar : MonoBehaviour
 
         // Test out Lidar data:
         // Debug.Log(this.Lidar.Samples);
+        // Debug.Log(this.Lidar.Samples[0]);
+        // Debug.Log(this.Lidar.Samples[540]);
         // Test out Lidar isForward
         // Debug.Log(this.Lidar.IsForwardClear());
     }
     private void FixedUpdate()
     {
-        if (Physics.LinearVelocity.z >= maxSpeed)
+        Vector3 deltaVelocity = Physics.LinearAccceleration * Time.fixedDeltaTime;
+        Vector3 predictedVelocity = Physics.LinearVelocity + deltaVelocity;
+        if (predictedVelocity.z > maxSpeed)
         {
-            carController.driveAxis = Math.Clamp(carController.driveAxis, -1, 0);
+            float exceededAccel = (predictedVelocity.z - maxSpeed) / Time.fixedDeltaTime;
+            float coefficient = Physics.LinearAccceleration.z / (Physics.LinearAccceleration.z - exceededAccel);
+            carController.driveAxis = Mathf.Min(carController.driveAxis, coefficient);
         }
     }
 

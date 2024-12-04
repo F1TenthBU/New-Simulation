@@ -47,7 +47,6 @@ class RacecarMLAgent:
                 angular_velocity = decision_steps[agent_id].obs[0][3:6]
                 self.physics.update(linear_acceleration, angular_velocity)
                 self.lidar.update(decision_steps[agent_id].obs[0][6:])
-                # print(f"observation len = {len(decision_steps[agent_id].obs[0])}.")
 
                 # Custom action for speed and angle
                 action = [self.angle, self.speed]
@@ -56,6 +55,7 @@ class RacecarMLAgent:
                 
             # Step the environment
             self.env.step()
+            # Let Unity's physics engine control the timing
 
     def start(self):
         self.running = True

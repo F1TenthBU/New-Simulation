@@ -9,17 +9,17 @@ public class Lidar : RacecarModule
     #region Constants
     /// <summary>
     /// The number of samples captured in a single rotation.
-    /// Based on the YDLIDAR X4 datasheet.
+    /// Based on the Hokuyo Lidar datasheet.
     /// </summary>
-    public const int NumSamples = 720;
+    public const int NumSamples = 1440;
 
     private const int forwardSampleRange = 10; // Number of samples to check in the forward direction
-    private const float clearDistanceThreshold = 50.0f; // Distance threshold to consider as clear (in dm)
+    private const float clearDistanceThreshold = 50.0f; // Distance threshold to consider as clear (in cm)
 
     /// <summary>
     /// The frequency of the LIDAR motor in hz.
     /// </summary>
-    private const int motorFrequency = 6;
+    private const int motorFrequency = 40;
 
     /// <summary>
     /// The number of sample taken per second.
@@ -27,10 +27,16 @@ public class Lidar : RacecarModule
     private const int samplesPerSecond = Lidar.NumSamples * Lidar.motorFrequency;
 
     /// <summary>
-    /// The minimum distance that can be detected (in dm).
-    /// Based on the YDLIDAR X4 datasheet.
+    /// The angle at which the LIDAR starts taking samples (in degrees).
+    /// Based on the Hokuyo Lidar datasheet.
     /// </summary>
-    private const float minRange = 1.2f;
+    private const int startAngle = 135;
+
+    /// <summary>
+    /// The minimum distance that can be detected (in m).
+    /// Based on the Hokuyo Lidar datasheet.
+    /// </summary>
+    private const float minRange = 0.02f;
 
     /// <summary>
     /// The value recorded for a sample less than minRange.
@@ -38,10 +44,10 @@ public class Lidar : RacecarModule
     private const float minCode = 0.0f;
 
     /// <summary>
-    /// The maximum distance that can be detected (in dm).
-    /// Based on the YDLIDAR X4 datasheet.
+    /// The maximum distance that can be detected (in m).
+    /// Based on the Hokuyo Lidar datasheet.
     /// </summary>
-    private const float maxRange = 100;
+    private const float maxRange = 10;
 
     /// <summary>
     /// The value recorded for a sample greater than maxRange.
@@ -50,19 +56,14 @@ public class Lidar : RacecarModule
 
     /// <summary>
     /// The average relative error of distance measurements.
-    /// Based on the YDLIDAR X4 datasheet.
+    /// Based on the Hokuyo Lidar datasheet.
     /// </summary>
     private const float averageErrorFactor = 0.02f;
 
     /// <summary>
-    /// The maximum range displayed in the LIDAR visualization (in dm).
+    /// The maximum range displayed in the LIDAR visualization (in m).
     /// </summary>
-    private const float visualizationRange = 50;
-
-    /// <summary>
-    /// The failure message to show when something hits the LIDAR.
-    /// </summary>
-    private const string collisionFailureMessage = "The LIDAR is expensive and fragile, please do not hit it!";
+    private const float visualizationRange = 10;
 
     /// <summary>
     /// The Lidar visualization area on screen.
@@ -101,10 +102,10 @@ public class Lidar : RacecarModule
         float length = Mathf.Min(texture.width / 2.0f, texture.height / 2.0f);
         for (int i = 0; i < this.Samples.Length; i++)
         {
-            if (this.Samples[i] != Lidar.minCode && this.Samples[i] != Lidar.maxCode && this.Samples[i] < Lidar.visualizationRange * 10)
+            if (this.Samples[i] < Lidar.visualizationRange * 100)
             {
-                float angle = 2 * Mathf.PI * i / Lidar.NumSamples;
-                Vector2 point = center + this.Samples[i] / 10 / Lidar.visualizationRange * length * new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
+                float angle = 2 * Mathf.PI * i / Lidar.NumSamples - Mathf.Deg2Rad * Lidar.startAngle;
+                Vector2 point = center + this.Samples[i] / 100 / Lidar.visualizationRange * length * new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
                 rawData[(int)point.y * texture.width + (int)point.x] = Color.red;
             }
         }
@@ -140,13 +141,20 @@ public class Lidar : RacecarModule
 
     private void FixedUpdate()
     {
-        int lastSample = (curSample + Mathf.RoundToInt(Lidar.samplesPerSecond * Time.deltaTime)) % NumSamples;
+        int lastSample = (curSample + Mathf.RoundToInt(Lidar.samplesPerSecond * Time.fixedDeltaTime)) % NumSamples;
 
         // Take samples for the current frame by physically rotating the LIDAR
         while (curSample != lastSample)
         {
-            this.transform.localRotation = Quaternion.Euler(0, curSample * 360.0f / Lidar.NumSamples, 0);
-            this.Samples[curSample] = TakeSample();
+            float lidar_angle = curSample * 360.0f / Lidar.NumSamples;
+            this.transform.localRotation = Quaternion.Euler(0, lidar_angle - startAngle, 0);
+            // don't read the backward direction
+            if (lidar_angle <= 270.25)
+            {
+                this.Samples[curSample] = TakeSample();
+            } else {
+                this.Samples[curSample] = 0;
+            }
             curSample = (curSample + 1) % NumSamples;
         }
     }
@@ -162,7 +170,7 @@ public class Lidar : RacecarModule
             float distance = Settings.IsRealism 
                 ? raycastHit.distance * NormalDist.Random(1, Lidar.averageErrorFactor)
                 : raycastHit.distance;
-            return distance > Lidar.minRange ? distance * 10 : Lidar.minCode;
+            return distance > Lidar.minRange ? distance * 100 : Lidar.minCode;
         }
 
         return Lidar.maxCode;
@@ -174,12 +182,12 @@ public class Lidar : RacecarModule
     /// <returns>True if the forward direction is clear, false otherwise.</returns>
     public bool IsForwardClear()
     {
-        int forwardIndex = 0;
+        int forwardIndex = Lidar.startAngle * Lidar.NumSamples / 360;
+        Debug.Log(forwardIndex);
 
         for (int i = forwardSampleRange; i <= forwardSampleRange; i++)
         {
-            int index = (forwardIndex + i + NumSamples) % NumSamples;
-            if (this.Samples[index] < clearDistanceThreshold)
+            if (this.Samples[i] < clearDistanceThreshold)
             {
                 return false;
             }
