@@ -58,5 +58,9 @@ When the message "Start training by pressing the Play button in the Unity Editor
 
 
 ### Code reference from the MIT simulation:
-* Lidar object and Lidar script (Lidar.cs)
-* Basic Racecar script and its associated CameraModule class
+Initial setup includes codes from MIT simulation:
+* Scripts folder: CenterOfMass.cs 
+* Scripts/Racecar folder: Racecar.cs, RacecarModule,cs, RacecarNWH.cs, Drive.cs, PhysicsModule.cs, Lidar.cs and CameraModule.cs
+* Scripts/Static folder: Constants.cs, NormalDist.cs, Settings.csScripts/UI folder: Hud.cs, ScreenManger.cs
+
+Modification on those files were later adapted.
