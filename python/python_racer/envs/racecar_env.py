@@ -48,7 +48,6 @@ class RacecarEnv(gym.Env):
         self.unity_env = UnityEnvironment(
             file_name=env_path,
             side_channels=[self.engine_configuration_channel],
-            no_graphics=True,
         )
         self.unity_env.reset()
         
@@ -60,7 +59,7 @@ class RacecarEnv(gym.Env):
         self.observation_space = gym.spaces.Box(
             low=-np.inf,
             high=np.inf,
-            shape=behavior_spec.observation_specs[0].shape,
+            shape=(1088,),  # 3 (linear) + 3 (angular) + 1 (collision) + 1081 (LIDAR)
             dtype=np.float32,
         )
         
@@ -70,6 +69,10 @@ class RacecarEnv(gym.Env):
             shape=(2,),  # [steering, acceleration]
             dtype=np.float32,
         )
+        
+        # Episode tracking
+        self.max_episode_steps = 1000
+        self.current_step = 0
     
     def reset(self, seed: int = None, options: Dict = None) -> Tuple[np.ndarray, Dict]:
         """
@@ -84,6 +87,9 @@ class RacecarEnv(gym.Env):
         """
         # Reset Unity environment
         self.unity_env.reset()
+        
+        # Reset episode tracking
+        self.current_step = 0
         
         # Get initial observation
         decision_steps, _ = self.unity_env.get_steps(self.behavior_name)
@@ -107,6 +113,9 @@ class RacecarEnv(gym.Env):
         Returns:
             Tuple of (observation, reward, terminated, truncated, info)
         """
+        # Increment step counter
+        self.current_step += 1
+        
         # Convert to structured action
         structured_action = RacecarAction(
             steering=float(action[0]),
@@ -123,9 +132,9 @@ class RacecarEnv(gym.Env):
         # Get result
         decision_steps, terminal_steps = self.unity_env.get_steps(self.behavior_name)
         
-        # Check if episode ended
-        done = len(terminal_steps.agent_id) > 0
-        if done:
+        # Check if episode ended in Unity
+        unity_done = len(terminal_steps.agent_id) > 0
+        if unity_done:
             raw_obs = terminal_steps.obs[0][0]
             reward = terminal_steps.reward[0]
         else:
@@ -135,12 +144,21 @@ class RacecarEnv(gym.Env):
         # Convert to structured observation
         structured_obs = RacecarObservation.from_unity_obs(raw_obs)
         
+        # Check termination conditions
+        terminated = structured_obs.collision or unity_done  # End episode on collision
+        truncated = self.current_step >= self.max_episode_steps  # End episode on max steps
+        
+        # If episode is ending, reset Unity
+        if terminated or truncated:
+            self.unity_env.reset()
+        
         # Return step result
         info = {
             'min_distance': np.min(structured_obs.lidar.ranges),
             'collision': structured_obs.collision,
+            'steps': self.current_step,
         }
-        return raw_obs, reward, done, False, info
+        return raw_obs, reward, terminated, truncated, info
     
     def close(self):
         """Close the environment."""

@@ -12,16 +12,14 @@ class ReactivePolicy(StructuredPolicy):
     
     def act(self, obs: RacecarObservation) -> RacecarAction:
         # Get closest obstacle
-        min_dist, min_idx = obs.lidar.get_closest_obstacle()
+        min_point, min_dist = obs.lidar.get_closest_point()
         
         # Calculate steering based on obstacle position
         # Convert index to angle: assuming LIDAR covers 270 degrees (-135 to +135)
-        angle_range = 270
-        mid_idx = len(obs.lidar.ranges) // 2
-        angle = (min_idx - mid_idx) / mid_idx * (angle_range/2)
+        angle = np.arctan2(min_point[0], min_point[1])  # in radians
         
         # Steer away from obstacle
-        steering = -np.clip(angle / 135.0, -1.0, 1.0)
+        steering = -np.clip(angle / np.pi, -1.0, 1.0)
         
         # Adjust speed based on forward clearance
         forward_dist = obs.lidar.get_forward_distance()

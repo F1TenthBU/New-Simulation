@@ -8,7 +8,7 @@ UNITY_START_ANGLE = 135       # degrees, clockwise from forward
 UNITY_END_ANGLE = 270.25      # degrees
 UNITY_MIN_RANGE = 2.0         # cm
 UNITY_MAX_RANGE = 1000.0      # cm (10m)
-PYTHON_NUM_SAMPLES = 1080     # Actual samples we receive (based on Hokuyo LIDAR's 270.25° field of view)
+PYTHON_NUM_SAMPLES = 1080     # Actual samples we receive (270.25° / (360° / 1440) = 1080)
 UNITY_FOV = UNITY_END_ANGLE - UNITY_START_ANGLE  # Field of view in degrees
 
 @dataclass
@@ -175,21 +175,4 @@ class Lidar:
                 gaussian_template[template_y_start:template_y_end, 
                                 template_x_start:template_x_end]
                 
-        return occupancy_map
-    
-    def get_closest_obstacle(self) -> Tuple[float, int]:
-        """
-        Get distance and index of closest obstacle.
-        
-        Returns:
-            Tuple of (distance in cm, index in LIDAR array)
-        """
-        valid_mask = (self.ranges >= UNITY_MIN_RANGE) & (self.ranges <= UNITY_MAX_RANGE)
-        if not np.any(valid_mask):
-            return UNITY_MAX_RANGE, len(self.ranges) // 2
-            
-        valid_ranges = self.ranges[valid_mask]
-        valid_indices = np.where(valid_mask)[0]
-        min_idx = np.argmin(valid_ranges)
-        return valid_ranges[min_idx], valid_indices[min_idx]
-        
+        return occupancy_map 
