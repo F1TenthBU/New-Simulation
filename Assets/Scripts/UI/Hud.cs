@@ -35,33 +35,6 @@ public class Hud : ScreenManager
     /// The alpha (transparency) of the Python icon when no script is connected.
     /// </summary>
     private const float unconnectedScriptAlpha = 0.25f;
-
-    /// <summary>
-    /// In the autograder, when the current time is this fraction of the time limit away from the time limit, the current time is shown as a warning color.
-    /// </summary>
-    private const float autograderWarningTimeRatio = 0.25f;
-
-    /// <summary>
-    /// The background color of the mode label when the simulation is in each SimulationMode.
-    /// </summary>
-    private static readonly Color[] modeColors =
-    {
-        new Color(0f, 0.75f, 0.25f), // default drive
-        new Color(0.75f, 0f, 0.25f), // user program
-        new Color(1f, 0.5f, 0f), // wait
-        new Color(0f, 0f, 0f) // finished
-    };
-
-    /// <summary>
-    /// The text displayed on the mode label when the simulation is in each SimulationMode.
-    /// </summary>
-    private static readonly string[] modeNames =
-    {
-        "Default Drive",
-        "User Program",
-        "Wait",
-        "Finished"
-    };
     #endregion
 
     #region Public Interface
@@ -82,12 +55,6 @@ public class Hud : ScreenManager
     public override void UpdateConnectedPrograms(bool[] connectedPrograms)
     {
         this.images[(int)Images.ConnectedProgram].color = connectedPrograms.Length > 0 ? new Color(1, 1, 1, 1) : new Color(1, 1, 1, Hud.unconnectedScriptAlpha);
-    }
-
-    public override void UpdateMode(SimulationMode mode)
-    {
-        this.texts[(int)Texts.Mode].text = Hud.modeNames[(int)mode];
-        this.images[(int)Images.ModeBackground].color = Hud.modeColors[(int)mode];
     }
 
     public override void UpdateTimeScale(float timeScale)
@@ -120,68 +87,6 @@ public class Hud : ScreenManager
         }
     }
     #endregion
-
-    // #region IAutograderHud
-    // void IAutograderHud.SetLevelInfo(int levelIndex, string title, string description)
-    // {
-    //     this.texts[(int)Texts.AutograderTitle].text = $"<b>Trial {levelIndex + 1}</b> - {title}";
-    //     this.texts[(int)Texts.AutograderDescription].text = description;
-    // }
-
-    // void IAutograderHud.UpdateScore(float score, float maxScore)
-    // {
-    //     this.texts[(int)Texts.AutograderScore].text = $"{score:F2}/{maxScore:F2}";
-
-    //     if (score == maxScore)
-    //     {
-    //         this.texts[(int)Texts.AutograderScore].color = Color.green;
-    //     }
-    // }
-
-    // void IAutograderHud.UpdateTime(float time, float timeLimit)
-    // {
-    //     base.UpdateTime(time, new float[0]);
-
-    //     if (time >= timeLimit)
-    //     {
-    //         this.texts[(int)Texts.MainTime].color = Color.red;
-    //     }
-    //     else if (timeLimit - time < timeLimit * Hud.autograderWarningTimeRatio)
-    //     {
-    //         this.texts[(int)Texts.MainTime].color = Color.yellow;
-    //     }
-    // }
-
-    // void IAutograderHud.SetMaxTime(float maxTime)
-    // {
-    //     this.texts[(int)Texts.MaxTime].text = $"Max: {maxTime:F1}";
-    // }
-
-    // void IAutograderHud.SetTimeBonus(float maxTime, float bonus, bool isLastBracket)
-    // {
-    //     if (bonus >= 0)
-    //     {
-    //         this.texts[(int)Texts.MaxTime].text = $"Bonus: +{bonus} (under {maxTime:F1} sec)";
-    //         this.texts[(int)Texts.MaxTime].color = bonus > 0 ? Color.green : Color.white;
-    //     }
-    //     else
-    //     {
-    //         this.texts[(int)Texts.MaxTime].text = $"Penalty: {bonus} (under {maxTime:F1} sec)";
-    //         this.texts[(int)Texts.MaxTime].color = isLastBracket ? Color.red : Color.yellow;
-    //     }
-    // }
-    // #endregion
-
-    /// <summary>
-    /// The texture containing the LIDAR visualization.
-    /// </summary>
-    public Texture2D LidarVisualization
-    {
-        get
-        {
-            return (Texture2D)this.images[(int)Images.LidarMap].texture;
-        }
-    }
 
     /// <summary>
     /// The texture containing the depth camera visualization.
@@ -224,9 +129,6 @@ public class Hud : ScreenManager
         Failure = 19,
         SuccessMessage = 21,
         SuccessTime = 22,
-        AutograderTitle = 25,
-        AutograderDescription = 26,
-        AutograderScore = 27,
         MaxTime = 28
     }
 
@@ -262,39 +164,7 @@ public class Hud : ScreenManager
 
     protected override void Update()
     {
-        this.UpdateController();
         base.Update();
-    }
-
-    /// <summary>
-    /// Update the controller icon to show the current buttons, triggers, and joysticks being pressed.
-    /// </summary>
-    private void UpdateController()
-    {
-        Array buttons = Enum.GetValues(typeof(Controller.Button));
-        Array triggers = Enum.GetValues(typeof(Controller.Trigger));
-        Array joysticks = Enum.GetValues(typeof(Controller.Joystick));
-
-        int index = (int)Images.ControllerFirstButton;
-
-        foreach (Controller.Button button in buttons)
-        {
-            this.images[index].enabled = Controller.IsDown(button);
-            index++;
-        }
-
-        foreach (Controller.Trigger trigger in triggers)
-        {
-            this.images[index].enabled = Controller.GetTrigger(trigger) > 0;
-            index++;
-        }
-
-        foreach (Controller.Joystick joystick in joysticks)
-        {
-            Vector2 joystickAxes = Controller.GetJoystick(joystick);
-            this.images[index].enabled = joystickAxes.x != 0 || joystickAxes.y != 0;
-            index++;
-        }
     }
 
     /// <summary>

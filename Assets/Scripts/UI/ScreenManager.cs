@@ -107,12 +107,6 @@ public abstract class ScreenManager : MonoBehaviour
     public abstract void UpdateConnectedPrograms(bool[] connectedPrograms);
 
     /// <summary>
-    /// Updates the element(s) showing the current simulation mode.
-    /// </summary>
-    /// <param name="mode">The current mode of the simulation.</param>
-    public abstract void UpdateMode(SimulationMode mode);
-
-    /// <summary>
     /// Updates the element(s) showing the current rate at which time progresses.
     /// </summary>
     /// <param name="timeScale">The current rate at which time progresses. 1 is full speed, 0.5 is half speed, and 0 is paused.</param>
