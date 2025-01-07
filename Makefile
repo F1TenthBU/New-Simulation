@@ -40,19 +40,17 @@ $(UNITY_EDITOR):
 		rm $(LOCAL_UNITY_DIR)/Unity.tar.xz; \
 	fi
 
-patch-unity-editor: $(UNITY_EDITOR)
-	@if [ "$(shell uname)" != "Darwin" ]; then \
-		echo "Patching Unity Editor libraries..." && \
-		cd $(LOCAL_UNITY_DIR)/Editor && \
-		find . -name "*.so" -type f -exec sh -c '\
-			ORIGIN_PATH="$$ORIGIN"; \
-			if [[ "{}" == *"/Data/Tools/"* ]]; then \
-				ORIGIN_PATH="$$ORIGIN:$$ORIGIN/.."; \
-			fi; \
-			echo "Patching {} with RPATH $$ORIGIN:$$ORIGIN/../../:$$ORIGIN/Data/Tools:$$ORIGIN/Data/il2cpp/build/deploy:$$ORIGIN/Data/MonoBleedingEdge/x86_64:$(RUNTIME_DEPS)" && \
-			patchelf --force-rpath --set-rpath "$$ORIGIN:$$ORIGIN/../../:$$ORIGIN/Data/Tools:$$ORIGIN/Data/il2cpp/build/deploy:$$ORIGIN/Data/MonoBleedingEdge/x86_64:$(RUNTIME_DEPS)" "{}" || echo "Failed to patch {}" \
-		' \; && \
-		echo "Unity Editor library patching complete."; \
+patch-unity: $(BUILD_OUTPUT)
+	@if [ -f /etc/NIXOS ]; then \
+		echo "Running on NixOS, patching Unity build libraries..." && \
+		cd Builds && \
+		echo "Patching build output..." && \
+		patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(RELATIVE_PATH) && \
+		patchelf --force-rpath --set-rpath '$$ORIGIN:$(RUNTIME_DEPS)' $(RELATIVE_PATH) && \
+		find . -name "*.so" -exec patchelf --force-rpath --set-rpath '$$ORIGIN:$(RUNTIME_DEPS)' {} \; && \
+		echo "Build output patching complete."; \
+	else \
+		echo "Not running on NixOS, skipping Unity build patching."; \
 	fi
 
 .PHONY: check-deps
@@ -72,7 +70,7 @@ check-deps: $(UNITY_EDITOR)
 		echo "Dependencies check complete."; \
 	fi
 
-$(BUILD_OUTPUT): patch-unity-editor
+$(BUILD_OUTPUT): $(UNITY_EDITOR)
 	@mkdir -p $(dir $(BUILD_OUTPUT))
 	@$(UNITY_EDITOR) \
 		-quit -batchmode -nographics \
@@ -80,7 +78,7 @@ $(BUILD_OUTPUT): patch-unity-editor
 		-executeMethod Builder.Build \
 		-logFile "$(CURDIR)/Builds/build.log"
 
-Builds/sim: $(BUILD_OUTPUT)
+Builds/sim: patch-unity
 	@if [ "$(shell uname)" = "Darwin" ]; then \
 		echo '#!/bin/bash' > $@; \
 		echo 'SCRIPT_DIR="$$(cd "$$(dirname "$${BASH_SOURCE[0]}")" && pwd)"' >> $@; \
@@ -88,12 +86,7 @@ Builds/sim: $(BUILD_OUTPUT)
 		echo 'exec "$$SCRIPT_DIR/$(RELATIVE_PATH)" "$$@"' >> $@; \
 	else \
 		cd Builds && \
-		echo "Patching build output..." && \
-		patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(RELATIVE_PATH) && \
-		patchelf --force-rpath --set-rpath '$$ORIGIN:$(RUNTIME_DEPS)' $(RELATIVE_PATH) && \
-		find . -name "*.so" -exec patchelf --force-rpath --set-rpath '$$ORIGIN:$(RUNTIME_DEPS)' {} \; && \
-		ln -sf $(RELATIVE_PATH) sim && \
-		echo "Build output patching complete."; \
+		ln -sf $(RELATIVE_PATH) sim; \
 	fi
 	@chmod +x $@
 
