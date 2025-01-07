@@ -23,7 +23,7 @@ endif
 
 BUILD_OUTPUT = Builds/$(RELATIVE_PATH)
 
-.PHONY: build
+.PHONY: build patch-unity-editor
 build: Builds/sim
 
 $(UNITY_EDITOR):
@@ -40,7 +40,39 @@ $(UNITY_EDITOR):
 		rm $(LOCAL_UNITY_DIR)/Unity.tar.xz; \
 	fi
 
-$(BUILD_OUTPUT): $(UNITY_EDITOR)
+patch-unity-editor: $(UNITY_EDITOR)
+	@if [ "$(shell uname)" != "Darwin" ]; then \
+		echo "Patching Unity Editor libraries..." && \
+		cd $(LOCAL_UNITY_DIR)/Editor && \
+		find . -name "*.so" -type f -exec sh -c '\
+			ORIGIN_PATH="$$ORIGIN"; \
+			if [[ "{}" == *"/Data/Tools/"* ]]; then \
+				ORIGIN_PATH="$$ORIGIN:$$ORIGIN/.."; \
+			fi; \
+			echo "Patching {} with RPATH $$ORIGIN:$$ORIGIN/../../:$$ORIGIN/Data/Tools:$$ORIGIN/Data/il2cpp/build/deploy:$$ORIGIN/Data/MonoBleedingEdge/x86_64:$(RUNTIME_DEPS)" && \
+			patchelf --force-rpath --set-rpath "$$ORIGIN:$$ORIGIN/../../:$$ORIGIN/Data/Tools:$$ORIGIN/Data/il2cpp/build/deploy:$$ORIGIN/Data/MonoBleedingEdge/x86_64:$(RUNTIME_DEPS)" "{}" || echo "Failed to patch {}" \
+		' \; && \
+		echo "Unity Editor library patching complete."; \
+	fi
+
+.PHONY: check-deps
+check-deps: $(UNITY_EDITOR)
+	@if [ "$(shell uname)" != "Darwin" ]; then \
+		echo "Checking Unity Editor dependencies..." && \
+		cd $(LOCAL_UNITY_DIR)/Editor && \
+		echo "=== Missing dependencies ===" && \
+		(ldd Unity 2>/dev/null | grep "not found" || true) && \
+		find . -name "*.so" -type f -exec sh -c '\
+			MISSING=$$(ldd "{}" 2>/dev/null | grep "not found"); \
+			if [ ! -z "$$MISSING" ]; then \
+				echo "\n=== Missing dependencies for {}: ==="; \
+				echo "$$MISSING"; \
+			fi \
+		' \; && \
+		echo "Dependencies check complete."; \
+	fi
+
+$(BUILD_OUTPUT): patch-unity-editor
 	@mkdir -p $(dir $(BUILD_OUTPUT))
 	@$(UNITY_EDITOR) \
 		-quit -batchmode -nographics \
@@ -56,10 +88,12 @@ Builds/sim: $(BUILD_OUTPUT)
 		echo 'exec "$$SCRIPT_DIR/$(RELATIVE_PATH)" "$$@"' >> $@; \
 	else \
 		cd Builds && \
+		echo "Patching build output..." && \
 		patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(RELATIVE_PATH) && \
 		patchelf --force-rpath --set-rpath '$$ORIGIN:$(RUNTIME_DEPS)' $(RELATIVE_PATH) && \
-		patchelf --force-rpath --set-rpath '$$ORIGIN:$(RUNTIME_DEPS)' UnityPlayer.so && \
-		ln -sf $(RELATIVE_PATH) sim; \
+		find . -name "*.so" -exec patchelf --force-rpath --set-rpath '$$ORIGIN:$(RUNTIME_DEPS)' {} \; && \
+		ln -sf $(RELATIVE_PATH) sim && \
+		echo "Build output patching complete."; \
 	fi
 	@chmod +x $@
 

@@ -11,7 +11,9 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          config.allowUnfree = true;
+          config = {
+            allowUnfree = true;
+          };
         };
         
         # Platform-specific settings
@@ -27,15 +29,31 @@
             xorg.libXcursor
             xorg.libXrandr
             xorg.libXi
+            xorg.libXext
+            xorg.libxcb
+            libxkbcommon
             gtk3
             gdk-pixbuf
             cairo
             pango
             libGL
             glib
+            glibc
             icu
             systemd
             zlib
+            libxml2
+            stdenv.cc.cc.lib  # for libstdc++
+            tbb
+            ocl-icd  # OpenCL
+            openimagedenoise
+            qt5.qtbase
+            qt5.qtx11extras
+            wayland
+            fontconfig
+            freetype
+            lttng-ust
+            dbus
           ];
           setupScript = ''
             export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath platformSettings.libs}:$LD_LIBRARY_PATH
