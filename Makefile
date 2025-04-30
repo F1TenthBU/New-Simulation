@@ -39,12 +39,27 @@ $(UNITY_EDITOR):
 		tar xf $(LOCAL_UNITY_DIR)/Unity.tar.xz -C $(LOCAL_UNITY_DIR) && \
 		rm $(LOCAL_UNITY_DIR)/Unity.tar.xz; \
 	fi
+	
+	@for binary in \
+		$(UNITY_EDITOR) \
+		$(LOCAL_UNITY_DIR)/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client \
+		$(LOCAL_UNITY_DIR)/Editor/Data/Resources/PackageManager/Server/UnityPackageManager \
+		$(LOCAL_UNITY_DIR)/Editor/Data/NetCoreRuntime/dotnet \
+		$(LOCAL_UNITY_DIR)/Editor/Data/Tools/Compilation/Unity.ILPP.Trigger/Unity.ILPP.Trigger \
+		$(LOCAL_UNITY_DIR)/Editor/Data/Tools/Compilation/Unity.ILPP.Runner/Unity.ILPP.Runner \
+		$(LOCAL_UNITY_DIR)/Editor/Data/Tools/UnityAutoQuitter \
+		$(LOCAL_UNITY_DIR)/Editor/Data/bee_backend \
+		$(LOCAL_UNITY_DIR)/Editor/Data/Tools/BuildPipeline/BeeLocalCacheTool \
+		$(LOCAL_UNITY_DIR)/Editor/Data/Tools/netcorerun/netcorerun \
+		$(LOCAL_UNITY_DIR)/Editor/Data/Tools/UnityShaderCompiler \
+		$(LOCAL_UNITY_DIR)/Editor/Data/il2cpp/build/deploy/UnityLinker \
+		$(LOCAL_UNITY_DIR)/Editor/Data/MonoBleedingEdge/bin/mono; do \
+		cp $$binary $$binary.tmp && \
+		patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $$binary.tmp && \
+		mv $$binary.tmp $$binary; \
+	done
 
-$(BUILD_OUTPUT): $(UNITY_EDITOR)
-	@mkdir -p $(dir $(BUILD_OUTPUT))
-	@patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(UNITY_EDITOR) && \
-	patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(LOCAL_UNITY_DIR)/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client; \
-	if $(LOCAL_UNITY_DIR)/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client --showEntitlements | grep -q 'No licenses were found.'; then \
+	@if $(LOCAL_UNITY_DIR)/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client --showEntitlements | grep -q 'No licenses were found.'; then \
 		echo "No Unity licenses were found, please login to Unity..."; echo; \
 		read -p "Username: " username; \
 		read -s -p "Password: " password; echo; \
@@ -52,23 +67,27 @@ $(BUILD_OUTPUT): $(UNITY_EDITOR)
 	else \
 		echo "Unity license(s) found."; \
 	fi
-	@patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(LOCAL_UNITY_DIR)/Editor/Data/Resources/PackageManager/Server/UnityPackageManager && \
-	patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(LOCAL_UNITY_DIR)/Editor/Data/NetCoreRuntime/dotnet && \
-	patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(LOCAL_UNITY_DIR)/Editor/Data/Tools/Compilation/Unity.ILPP.Trigger/Unity.ILPP.Trigger && \
-	patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(LOCAL_UNITY_DIR)/Editor/Data/Tools/Compilation/Unity.ILPP.Runner/Unity.ILPP.Runner && \
-	patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(LOCAL_UNITY_DIR)/Editor/Data/Tools/UnityAutoQuitter && \
-	patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(LOCAL_UNITY_DIR)/Editor/Data/bee_backend && \
-	patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(LOCAL_UNITY_DIR)/Editor/Data/Tools/BuildPipeline/BeeLocalCacheTool && \
-	patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(LOCAL_UNITY_DIR)/Editor/Data/Tools/netcorerun/netcorerun && \
-	patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(LOCAL_UNITY_DIR)/Editor/Data/Tools/UnityShaderCompiler && \
-	patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(LOCAL_UNITY_DIR)/Editor/Data/il2cpp/build/deploy/UnityLinker && \
-	patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(LOCAL_UNITY_DIR)/Editor/Data/MonoBleedingEdge/bin/mono && \
-	patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" Library/PackageCache/com.unity.burst@1.8.17/.Runtime/burst-lld-16-hostlin; \
-	$(UNITY_EDITOR) \
+
+$(BUILD_OUTPUT): $(UNITY_EDITOR)
+	@mkdir -p $(dir $(BUILD_OUTPUT))
+	@$(UNITY_EDITOR) \
 		-quit -batchmode -nographics \
 		-projectPath "$(CURDIR)" \
 		-executeMethod Builder.Build \
-		-logFile "$(CURDIR)/Builds/build.log"
+		-logFile "$(CURDIR)/Builds/build.log"; \
+	if [ $$? -ne 0 ]; then \
+		if grep -q -E "Could not start dynamically linked executable: .*/Library/PackageCache/com.unity.burst@1.8.17/.Runtime/burst-lld-16-hostlin" $(CURDIR)/Builds/build.log; then \
+			patchelf --set-interpreter "$(shell cat $(NIX_CC)/nix-support/dynamic-linker)" $(CURDIR)/Library/PackageCache/com.unity.burst@1.8.17/.Runtime/burst-lld-16-hostlin; \
+			rm -rf $(BUILD_OUTPUT)/{*,.[!.]*,..?*}; \
+			$(UNITY_EDITOR) \
+				-quit -batchmode -nographics \
+				-projectPath "$(CURDIR)" \
+				-executeMethod Builder.Build \
+				-logFile "$(CURDIR)/Builds/build.log"; \
+		else \
+	    	echo "Build failed, check Builds/build.log for more information"; \
+		fi; \
+	fi
 
 Builds/sim: $(BUILD_OUTPUT)
 	@if [ "$(shell uname)" = "Darwin" ]; then \
