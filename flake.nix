@@ -36,6 +36,9 @@
             icu
             systemd
             zlib
+            stdenv.cc.cc.lib
+            libxml2
+            openssl            
           ];
           setupScript = ''
             export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath platformSettings.libs}:$LD_LIBRARY_PATH
